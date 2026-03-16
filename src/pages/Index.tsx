@@ -6,6 +6,7 @@ import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
 import ScrollStorySection from "@/components/ScrollStorySection";
+import Character3D from "@/components/Character3D";
 import heroBg from "@/assets/hero-bg.jpg";
 import cosmicDreams from "@/assets/work-cosmic-dreams.jpg";
 import neonCity from "@/assets/work-neon-city.jpg";
