@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CinematicLoader from "@/components/CinematicLoader";
+import ScrollProgressBar from "@/components/ScrollProgressBar";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Works from "./pages/Works";
@@ -14,6 +17,22 @@ import Join from "./pages/Join";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/works" element={<PageTransition><Works /></PageTransition>} />
+        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/join" element={<PageTransition><Join /></PageTransition>} />
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 const App = () => {
   const [loaded, setLoaded] = useState(false);
@@ -26,15 +45,9 @@ const App = () => {
         <BrowserRouter>
           {loaded && (
             <>
+              <ScrollProgressBar />
               <Navbar />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/works" element={<Works />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/join" element={<Join />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AnimatedRoutes />
               <Footer />
             </>
           )}

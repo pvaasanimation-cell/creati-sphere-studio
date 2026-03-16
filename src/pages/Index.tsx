@@ -5,14 +5,20 @@ import ParticleField from "@/components/ParticleField";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
+import ScrollStorySection from "@/components/ScrollStorySection";
+import heroBg from "@/assets/hero-bg.jpg";
+import cosmicDreams from "@/assets/work-cosmic-dreams.jpg";
+import neonCity from "@/assets/work-neon-city.jpg";
+import abstractFlow from "@/assets/work-abstract-flow.jpg";
+import digitalWorlds from "@/assets/work-digital-worlds.jpg";
 
 const transition = { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
 
 const works = [
-  { title: "Cosmic Dreams", category: "3D Animation", color: "from-primary to-secondary" },
-  { title: "Neon City", category: "Motion Graphics", color: "from-secondary to-primary" },
-  { title: "Abstract Flow", category: "VFX", color: "from-accent to-primary" },
-  { title: "Digital Worlds", category: "2D Animation", color: "from-primary to-accent" },
+  { title: "Cosmic Dreams", category: "3D Animation", image: cosmicDreams },
+  { title: "Neon City", category: "Motion Graphics", image: neonCity },
+  { title: "Abstract Flow", category: "VFX", image: abstractFlow },
+  { title: "Digital Worlds", category: "2D Animation", image: digitalWorlds },
 ];
 
 const services = [
@@ -35,7 +41,10 @@ const Index = () => {
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <ParticleField />
-        <div className="gradient-bg-subtle absolute inset-0 z-[1]" />
+        <div className="absolute inset-0 z-[1]">
+          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+        </div>
 
         <div className="relative z-10 container mx-auto px-6 text-center">
           <motion.div
@@ -121,8 +130,10 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ ...transition, delay: i * 0.1 }}
               >
-                <GlassCard className="p-0 overflow-hidden cursor-pointer">
-                  <div className={`aspect-[16/10] bg-gradient-to-br ${work.color} opacity-20`} />
+                <GlassCard className="p-0 overflow-hidden cursor-pointer group">
+                  <div className="aspect-[16/10] overflow-hidden">
+                    <img src={work.image} alt={work.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                  </div>
                   <div className="p-6">
                     <span className="text-interface text-primary">{work.category}</span>
                     <h3 className="text-xl font-bold text-foreground mt-1">{work.title}</h3>
@@ -146,6 +157,9 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Scroll Story */}
+      <ScrollStorySection />
 
       {/* Services */}
       <section className="py-[15vh] relative z-10">
