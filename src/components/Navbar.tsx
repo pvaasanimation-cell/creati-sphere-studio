@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, Shield } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Home", path: "/" },
   { label: "Works", path: "/works" },
   { label: "About", path: "/about" },
+  { label: "Members", path: "/members" },
   { label: "Community", path: "/community" },
-  { label: "Join", path: "/join" },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut, memberProfile } = useAuth();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 50);
@@ -60,12 +62,36 @@ const Navbar = () => {
           ))}
         </div>
 
-        <Link
-          to="/join"
-          className="hidden md:block px-5 py-2.5 rounded-lg gradient-bg-purple-cyan text-primary-foreground text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:-translate-y-0.5"
-        >
-          Join Studio
-        </Link>
+        <div className="hidden md:flex items-center gap-2">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-accent hover:bg-accent/10 transition-colors text-sm font-medium"
+            >
+              <Shield size={14} /> Admin
+            </Link>
+          )}
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                {memberProfile?.name || "User"}
+              </span>
+              <button
+                onClick={signOut}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg glass text-sm text-foreground hover:bg-muted/50 transition-colors"
+              >
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="px-5 py-2.5 rounded-lg gradient-bg-purple-cyan text-primary-foreground text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:-translate-y-0.5"
+            >
+              Join Studio
+            </Link>
+          )}
+        </div>
 
         {/* Mobile toggle */}
         <button
@@ -99,6 +125,23 @@ const Navbar = () => {
                   {item.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link to="/admin" className="px-4 py-3 rounded-lg text-accent text-sm font-medium flex items-center gap-2">
+                  <Shield size={14} /> Admin Panel
+                </Link>
+              )}
+              {user ? (
+                <button
+                  onClick={signOut}
+                  className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground text-left flex items-center gap-2"
+                >
+                  <LogOut size={14} /> Logout
+                </button>
+              ) : (
+                <Link to="/auth" className="px-4 py-3 rounded-lg text-primary text-sm font-medium">
+                  Join / Login
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

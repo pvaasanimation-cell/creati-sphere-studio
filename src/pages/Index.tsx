@@ -47,23 +47,35 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...transition, delay: 0.3 }}
-          >
-            <span className="text-interface text-primary mb-6 block">Animation Studio</span>
-            <h1 className="text-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-6 text-foreground">
-              Where Creativity
-              <br />
-              <span className="gradient-purple-cyan">Becomes Motion</span>
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-              A global collective of motion designers, 3D artists, and code-poets.
-              We don't just build frames — we build worlds.
-            </p>
-          </motion.div>
+        <div className="relative z-10 container mx-auto px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="flex-1 text-center lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...transition, delay: 0.3 }}
+              >
+                <span className="text-interface text-primary mb-6 block">Animation Studio</span>
+                <h1 className="text-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl mb-6 text-foreground">
+                  Where Creativity
+                  <br />
+                  <span className="gradient-purple-cyan">Becomes Motion</span>
+                </h1>
+                <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+                  A global collective of motion designers, 3D artists, and code-poets.
+                  We don't just build frames — we build worlds.
+                </p>
+              </motion.div>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ ...transition, delay: 0.5 }}
+              className="flex-1 w-full max-w-lg"
+            >
+              <Character3D />
+            </motion.div>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
