@@ -54,6 +54,7 @@ const App = () => {
           <AuthProvider>
             {loaded && (
               <>
+                <CursorGlow />
                 <ScrollProgressBar />
                 <Navbar />
                 <AnimatedRoutes />
