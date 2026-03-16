@@ -41,7 +41,10 @@ const Index = () => {
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <ParticleField />
-        <div className="gradient-bg-subtle absolute inset-0 z-[1]" />
+        <div className="absolute inset-0 z-[1]">
+          <img src={heroBg} alt="" className="w-full h-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
+        </div>
 
         <div className="relative z-10 container mx-auto px-6 text-center">
           <motion.div
