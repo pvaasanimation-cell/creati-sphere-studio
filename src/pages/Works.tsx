@@ -4,19 +4,28 @@ import SectionHeading from "@/components/SectionHeading";
 import GlassCard from "@/components/GlassCard";
 import { X } from "lucide-react";
 
+import cosmicDreams from "@/assets/work-cosmic-dreams.jpg";
+import neonCity from "@/assets/work-neon-city.jpg";
+import abstractFlow from "@/assets/work-abstract-flow.jpg";
+import digitalWorlds from "@/assets/work-digital-worlds.jpg";
+import chromaticPulse from "@/assets/work-chromatic-pulse.jpg";
+import waveTheory from "@/assets/work-wave-theory.jpg";
+import pixelStorm from "@/assets/work-pixel-storm.jpg";
+import sakuraTales from "@/assets/work-sakura-tales.jpg";
+
 const transition = { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
 
 const categories = ["All", "2D Animation", "3D Animation", "Motion Graphics", "VFX"];
 
 const projects = [
-  { title: "Cosmic Dreams", category: "3D Animation", desc: "An interstellar journey through procedurally generated galaxies.", gradient: "from-primary to-secondary" },
-  { title: "Neon City", category: "Motion Graphics", desc: "Futuristic cityscapes brought to life with kinetic typography.", gradient: "from-secondary to-primary" },
-  { title: "Abstract Flow", category: "VFX", desc: "Fluid simulations and particle dynamics in a surreal dreamscape.", gradient: "from-accent to-primary" },
-  { title: "Digital Worlds", category: "2D Animation", desc: "Hand-drawn character animation meets digital compositing.", gradient: "from-primary to-accent" },
-  { title: "Chromatic Pulse", category: "3D Animation", desc: "Real-time rendered 3D environments with ray-traced lighting.", gradient: "from-secondary to-accent" },
-  { title: "Wave Theory", category: "Motion Graphics", desc: "Audio-reactive visuals synced to an original soundtrack.", gradient: "from-primary to-secondary" },
-  { title: "Pixel Storm", category: "VFX", desc: "Destruction simulations with volumetric smoke and debris.", gradient: "from-accent to-secondary" },
-  { title: "Sakura Tales", category: "2D Animation", desc: "A poetic short film blending watercolor textures with animation.", gradient: "from-primary to-accent" },
+  { title: "Cosmic Dreams", category: "3D Animation", desc: "An interstellar journey through procedurally generated galaxies.", image: cosmicDreams },
+  { title: "Neon City", category: "Motion Graphics", desc: "Futuristic cityscapes brought to life with kinetic typography.", image: neonCity },
+  { title: "Abstract Flow", category: "VFX", desc: "Fluid simulations and particle dynamics in a surreal dreamscape.", image: abstractFlow },
+  { title: "Digital Worlds", category: "2D Animation", desc: "Hand-drawn character animation meets digital compositing.", image: digitalWorlds },
+  { title: "Chromatic Pulse", category: "3D Animation", desc: "Real-time rendered 3D environments with ray-traced lighting.", image: chromaticPulse },
+  { title: "Wave Theory", category: "Motion Graphics", desc: "Audio-reactive visuals synced to an original soundtrack.", image: waveTheory },
+  { title: "Pixel Storm", category: "VFX", desc: "Destruction simulations with volumetric smoke and debris.", image: pixelStorm },
+  { title: "Sakura Tales", category: "2D Animation", desc: "A poetic short film blending watercolor textures with animation.", image: sakuraTales },
 ];
 
 const Works = () => {
@@ -71,8 +80,10 @@ const Works = () => {
                   onClick={() => setSelected(project)}
                   className="cursor-pointer"
                 >
-                  <GlassCard className="p-0 overflow-hidden">
-                    <div className={`aspect-[16/10] bg-gradient-to-br ${project.gradient} opacity-20 transition-opacity duration-500 group-hover:opacity-30`} />
+                  <GlassCard className="p-0 overflow-hidden group">
+                    <div className="aspect-[16/10] overflow-hidden">
+                      <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                    </div>
                     <div className="p-6">
                       <span className="text-interface text-primary">{project.category}</span>
                       <h3 className="text-xl font-bold text-foreground mt-1">{project.title}</h3>
@@ -104,7 +115,9 @@ const Works = () => {
               onClick={(e) => e.stopPropagation()}
               className="glass rounded-2xl max-w-2xl w-full overflow-hidden"
             >
-              <div className={`aspect-video bg-gradient-to-br ${selected.gradient} opacity-30`} />
+              <div className="aspect-video overflow-hidden">
+                <img src={selected.image} alt={selected.title} className="w-full h-full object-cover" />
+              </div>
               <div className="p-8">
                 <div className="flex items-start justify-between">
                   <div>
