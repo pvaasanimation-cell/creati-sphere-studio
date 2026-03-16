@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CinematicLoader from "@/components/CinematicLoader";
@@ -13,7 +14,10 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Works from "./pages/Works";
 import Community from "./pages/Community";
+import Members from "./pages/Members";
 import Join from "./pages/Join";
+import Auth from "./pages/Auth";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +31,10 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={<PageTransition><About /></PageTransition>} />
         <Route path="/works" element={<PageTransition><Works /></PageTransition>} />
         <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/members" element={<PageTransition><Members /></PageTransition>} />
         <Route path="/join" element={<PageTransition><Join /></PageTransition>} />
+        <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
@@ -43,14 +50,16 @@ const App = () => {
         <Sonner />
         {!loaded && <CinematicLoader onComplete={() => setLoaded(true)} />}
         <BrowserRouter>
-          {loaded && (
-            <>
-              <ScrollProgressBar />
-              <Navbar />
-              <AnimatedRoutes />
-              <Footer />
-            </>
-          )}
+          <AuthProvider>
+            {loaded && (
+              <>
+                <ScrollProgressBar />
+                <Navbar />
+                <AnimatedRoutes />
+                <Footer />
+              </>
+            )}
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
