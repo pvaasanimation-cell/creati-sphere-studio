@@ -5,6 +5,12 @@ import ParticleField from "@/components/ParticleField";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
+import ScrollStorySection from "@/components/ScrollStorySection";
+import heroBg from "@/assets/hero-bg.jpg";
+import cosmicDreams from "@/assets/work-cosmic-dreams.jpg";
+import neonCity from "@/assets/work-neon-city.jpg";
+import abstractFlow from "@/assets/work-abstract-flow.jpg";
+import digitalWorlds from "@/assets/work-digital-worlds.jpg";
 
 const transition = { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
 
