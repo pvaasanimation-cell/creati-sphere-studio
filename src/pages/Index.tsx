@@ -158,6 +158,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Scroll Story */}
+      <ScrollStorySection />
+
       {/* Services */}
       <section className="py-[15vh] relative z-10">
         <div className="container mx-auto px-6">

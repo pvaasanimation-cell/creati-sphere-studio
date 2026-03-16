@@ -18,6 +18,22 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+        <Route path="/works" element={<PageTransition><Works /></PageTransition>} />
+        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/join" element={<PageTransition><Join /></PageTransition>} />
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
 const App = () => {
   const [loaded, setLoaded] = useState(false);
 
@@ -29,15 +45,9 @@ const App = () => {
         <BrowserRouter>
           {loaded && (
             <>
+              <ScrollProgressBar />
               <Navbar />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/works" element={<Works />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/join" element={<Join />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AnimatedRoutes />
               <Footer />
             </>
           )}
