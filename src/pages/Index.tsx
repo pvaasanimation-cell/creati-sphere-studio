@@ -130,8 +130,10 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ ...transition, delay: i * 0.1 }}
               >
-                <GlassCard className="p-0 overflow-hidden cursor-pointer">
-                  <div className={`aspect-[16/10] bg-gradient-to-br ${work.color} opacity-20`} />
+                <GlassCard className="p-0 overflow-hidden cursor-pointer group">
+                  <div className="aspect-[16/10] overflow-hidden">
+                    <img src={work.image} alt={work.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                  </div>
                   <div className="p-6">
                     <span className="text-interface text-primary">{work.category}</span>
                     <h3 className="text-xl font-bold text-foreground mt-1">{work.title}</h3>
