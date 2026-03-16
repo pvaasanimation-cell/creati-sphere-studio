@@ -15,10 +15,10 @@ import digitalWorlds from "@/assets/work-digital-worlds.jpg";
 const transition = { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
 
 const works = [
-  { title: "Cosmic Dreams", category: "3D Animation", color: "from-primary to-secondary" },
-  { title: "Neon City", category: "Motion Graphics", color: "from-secondary to-primary" },
-  { title: "Abstract Flow", category: "VFX", color: "from-accent to-primary" },
-  { title: "Digital Worlds", category: "2D Animation", color: "from-primary to-accent" },
+  { title: "Cosmic Dreams", category: "3D Animation", image: cosmicDreams },
+  { title: "Neon City", category: "Motion Graphics", image: neonCity },
+  { title: "Abstract Flow", category: "VFX", image: abstractFlow },
+  { title: "Digital Worlds", category: "2D Animation", image: digitalWorlds },
 ];
 
 const services = [
