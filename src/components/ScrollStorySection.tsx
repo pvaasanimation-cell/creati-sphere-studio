@@ -57,11 +57,12 @@ const StoryStep = ({ step, index }: { step: typeof steps[0]; index: number }) =>
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 1]);
   const iconRotate = useTransform(scrollYProgress, [0, 1], [-30, 0]);
   const blur = useTransform(scrollYProgress, [0, 0.3, 1], [8, 0, 0]);
+  const filterBlur = useTransform(blur, (v) => `blur(${v}px)`);
 
   return (
     <motion.div
       ref={ref}
-      style={{ opacity, x, scale, filter: useTransform(blur, (v) => `blur(${v}px)`) }}
+      style={{ opacity, x, scale, filter: filterBlur }}
       className="relative flex items-center gap-8 md:gap-16"
     >
       {/* Timeline connector */}
