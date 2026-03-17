@@ -115,12 +115,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (!error && data.user) {
-      // Create member profile
-      const { error: profileError } = await supabase.from("members").insert({
-        user_id: data.user.id,
-        name: meta.name,
-        username: meta.username,
-        country: meta.country,
+      // Create member profile using SECURITY DEFINER function (bypasses RLS)
+      const { error: profileError } = await supabase.rpc("create_member_profile", {
+        _user_id: data.user.id,
+        _name: meta.name,
+        _username: meta.username,
+        _country: meta.country,
       });
       if (profileError) return { error: profileError };
     }

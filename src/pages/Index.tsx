@@ -86,7 +86,7 @@ const WorkCard = ({ work, index }: { work: typeof works[0]; index: number }) => 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <GlassCard className="p-0 overflow-hidden cursor-pointer group">
+      <GlassCard className="p-0 overflow-hidden cursor-pointer group border-glow">
         <div className="aspect-[16/10] overflow-hidden relative">
           <motion.img
             src={work.image}
@@ -146,7 +146,7 @@ const ServiceCard = ({ service, index }: { service: typeof services[0]; index: n
 
   return (
     <motion.div ref={ref} style={{ rotateX, opacity, transformPerspective: 1000 }}>
-      <GlassCard className="p-6 h-full relative overflow-hidden group">
+      <GlassCard className="p-6 h-full relative overflow-hidden group border-glow">
         {/* Ambient glow */}
         <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-3xl bg-primary" />
         <div className="relative z-10">
@@ -170,7 +170,7 @@ const MemberCard = ({ member, index }: { member: typeof featuredMembers[0]; inde
     transition={{ ...transition, delay: index * 0.12 }}
     style={{ transformPerspective: 800 }}
   >
-    <GlassCard className="p-6 text-center relative overflow-hidden group">
+    <GlassCard className="p-6 text-center relative overflow-hidden group border-glow">
       {/* Animated border glow */}
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
         style={{ background: "conic-gradient(from 0deg, transparent, rgba(124,58,237,0.1), transparent, rgba(6,182,212,0.1), transparent)" }}
@@ -179,7 +179,7 @@ const MemberCard = ({ member, index }: { member: typeof featuredMembers[0]; inde
         <motion.div
           whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="w-18 h-18 rounded-2xl gradient-bg-purple-cyan mx-auto mb-4 flex items-center justify-center text-primary-foreground font-bold text-2xl w-[72px] h-[72px]"
+          className="w-[72px] h-[72px] rounded-2xl gradient-bg-purple-cyan mx-auto mb-4 flex items-center justify-center text-primary-foreground font-bold text-2xl"
         >
           {member.name[0]}
         </motion.div>
@@ -201,27 +201,34 @@ const Index = () => {
   const heroOpacity = useTransform(heroScroll, [0, 0.8], [1, 0]);
   const heroScale = useTransform(heroScroll, [0, 0.8], [1, 0.95]);
   const heroBgY = useTransform(heroScroll, [0, 1], ["0%", "30%"]);
+  const heroBlur = useTransform(heroScroll, [0, 0.8], [0, 10]);
+  const heroFilter = useTransform(heroBlur, (v) => `blur(${v}px)`);
 
   return (
     <div className="noise-bg">
       {/* ═══ HERO ═══ */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Layer 1: WebGL Particles */}
         <ParticleField />
 
-        {/* Parallax background */}
+        {/* Layer 2: Parallax background */}
         <motion.div className="absolute inset-0 z-[1]" style={{ y: heroBgY }}>
           <img src={heroBg} alt="" className="w-full h-full object-cover opacity-15" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
         </motion.div>
 
-        {/* Ambient orbs */}
+        {/* Layer 3: Ambient orbs */}
         <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
-          <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[80px] animate-float" style={{ animationDelay: "3s" }} />
-          <div className="absolute top-1/2 right-1/3 w-[200px] h-[200px] rounded-full bg-accent/5 blur-[60px] animate-float" style={{ animationDelay: "5s" }} />
+          <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" style={{ animationDelay: "3s" }} />
+          <div className="absolute top-1/2 right-1/3 w-[200px] h-[200px] rounded-full bg-accent/5 blur-[60px] animate-breathe" style={{ animationDelay: "5s" }} />
         </div>
 
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative z-10 container mx-auto px-6">
+        {/* Layer 4: Content */}
+        <motion.div 
+          style={{ opacity: heroOpacity, scale: heroScale, filter: heroFilter }} 
+          className="relative z-10 container mx-auto px-6"
+        >
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-12">
             <div className="flex-1 text-center lg:text-left">
               <motion.div
@@ -256,14 +263,14 @@ const Index = () => {
               >
                 <Link
                   to="/works"
-                  className="group px-8 py-4 rounded-xl gradient-bg-purple-cyan text-primary-foreground font-semibold transition-all duration-500 hover:shadow-[0_0_60px_rgba(124,58,237,0.4)] hover:-translate-y-1 flex items-center justify-center gap-2"
+                  className="group px-8 py-4 rounded-xl gradient-bg-purple-cyan text-primary-foreground font-semibold btn-cinematic hover:shadow-[0_0_60px_rgba(124,58,237,0.4)] hover:-translate-y-1 flex items-center justify-center gap-2"
                 >
                   View Our Work
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   to="/auth"
-                  className="px-8 py-4 rounded-xl glass text-foreground font-semibold transition-all duration-500 hover:-translate-y-1 hover:border-primary/30 flex items-center justify-center gap-2"
+                  className="px-8 py-4 rounded-xl glass text-foreground font-semibold btn-cinematic hover:-translate-y-1 hover:border-primary/30 flex items-center justify-center gap-2"
                 >
                   Join the Pulse
                 </Link>
@@ -335,7 +342,7 @@ const Index = () => {
           >
             <Link
               to="/works"
-              className="group text-interface text-primary hover:text-foreground transition-colors inline-flex items-center gap-2"
+              className="group text-interface text-primary hover:text-foreground transition-colors inline-flex items-center gap-2 reveal-line pb-1"
             >
               View All Works <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -398,10 +405,10 @@ const Index = () => {
       {/* ═══ CTA ═══ */}
       <section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
-          <GlassCard className="p-12 md:p-20 text-center relative overflow-hidden" hover={false}>
+          <GlassCard className="p-12 md:p-20 text-center relative overflow-hidden border-glow" hover={false}>
             {/* Background orbs */}
-            <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px]" />
-            <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full bg-secondary/5 blur-[80px]" />
+            <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] animate-breathe" />
+            <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" />
 
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -419,7 +426,7 @@ const Index = () => {
               </p>
               <Link
                 to="/auth"
-                className="group inline-flex items-center gap-2 px-10 py-5 rounded-xl gradient-bg-purple-cyan text-primary-foreground font-semibold text-lg transition-all duration-500 hover:shadow-[0_0_60px_rgba(124,58,237,0.4)] hover:-translate-y-1"
+                className="group inline-flex items-center gap-2 px-10 py-5 rounded-xl gradient-bg-purple-cyan text-primary-foreground font-semibold text-lg btn-cinematic hover:shadow-[0_0_60px_rgba(124,58,237,0.4)] hover:-translate-y-1"
               >
                 Join the Pulse
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />

@@ -82,6 +82,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_member_profile: {
+        Args: {
+          _country?: string
+          _name: string
+          _user_id: string
+          _username: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
