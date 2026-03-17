@@ -202,6 +202,7 @@ const Index = () => {
   const heroScale = useTransform(heroScroll, [0, 0.8], [1, 0.95]);
   const heroBgY = useTransform(heroScroll, [0, 1], ["0%", "30%"]);
   const heroBlur = useTransform(heroScroll, [0, 0.8], [0, 10]);
+  const heroFilter = useTransform(heroBlur, (v) => `blur(${v}px)`);
 
   return (
     <div className="noise-bg">
