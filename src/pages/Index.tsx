@@ -226,7 +226,7 @@ const Index = () => {
 
         {/* Layer 4: Content */}
         <motion.div 
-          style={{ opacity: heroOpacity, scale: heroScale, filter: useTransform(heroBlur, (v) => `blur(${v}px)`) }} 
+          style={{ opacity: heroOpacity, scale: heroScale, filter: heroFilter }} 
           className="relative z-10 container mx-auto px-6"
         >
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-12">
