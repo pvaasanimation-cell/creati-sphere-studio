@@ -56,32 +56,38 @@ const StoryStep = ({ step, index }: { step: typeof steps[0]; index: number }) =>
   );
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 1]);
   const iconRotate = useTransform(scrollYProgress, [0, 1], [-30, 0]);
+  const blur = useTransform(scrollYProgress, [0, 0.3, 1], [8, 0, 0]);
 
   return (
     <motion.div
       ref={ref}
-      style={{ opacity, x, scale }}
+      style={{ opacity, x, scale, filter: useTransform(blur, (v) => `blur(${v}px)`) }}
       className="relative flex items-center gap-8 md:gap-16"
     >
       {/* Timeline connector */}
       <div className="hidden md:flex flex-col items-center gap-2 min-w-[80px]">
         <motion.div
           style={{ rotate: iconRotate }}
-          className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg`}
-          whileHover={{ scale: 1.1, rotate: 5 }}
+          className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg relative`}
+          whileHover={{ scale: 1.15, rotate: 5 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
           <step.icon size={28} className="text-primary-foreground" />
+          {/* Icon pulse */}
+          <div className="absolute inset-0 rounded-2xl animate-ping-slow opacity-30" style={{ background: step.glowColor }} />
         </motion.div>
         <span className="text-interface text-muted-foreground">{step.phase}</span>
       </div>
 
       {/* Content card */}
-      <div className="flex-1 glass rounded-2xl p-8 md:p-10 relative overflow-hidden group">
+      <div className="flex-1 glass-strong rounded-2xl p-8 md:p-10 relative overflow-hidden group border-glow">
         {/* Gradient overlay */}
         <div
-          className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-700`}
+          className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700`}
         />
+
+        {/* Animated line */}
+        <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${step.color} opacity-0 group-hover:opacity-40 transition-opacity duration-700`} />
 
         {/* Mobile icon */}
         <div className="md:hidden flex items-center gap-3 mb-4">
@@ -122,7 +128,10 @@ const ScrollStorySection = () => {
 
   return (
     <section ref={containerRef} className="py-[15vh] relative z-10">
-      <div className="container mx-auto px-6">
+      {/* Section ambient light */}
+      <div className="absolute inset-0 gradient-bg-cinematic pointer-events-none" />
+      
+      <div className="container mx-auto px-6 relative">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}

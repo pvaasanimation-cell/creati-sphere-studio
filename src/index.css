@@ -111,6 +111,17 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
+  .glass-strong {
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+      0 30px 80px rgba(0, 0, 0, 0.6),
+      0 0 50px rgba(124, 58, 237, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
   /* ─── Glows ─── */
   .glow-purple {
     box-shadow: 0 0 30px var(--glow-purple), 0 0 60px rgba(124, 58, 237, 0.1);
@@ -141,6 +152,13 @@
     background: 
       radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+  }
+
+  .gradient-bg-cinematic {
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
   }
 
   /* ─── Typography ─── */
@@ -215,4 +233,49 @@
     background: radial-gradient(circle 80px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(124, 58, 237, 0.08), transparent);
     pointer-events: none;
   }
+
+  /* ─── Cinematic reveal line ─── */
+  .reveal-line {
+    position: relative;
+    overflow: hidden;
+  }
+  .reveal-line::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), hsl(var(--secondary)), transparent);
+    transform: scaleX(0);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal-line:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* ─── Magnetic button ─── */
+  .btn-cinematic {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-cinematic::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .btn-cinematic:hover::before {
+    transform: translateX(100%);
+  }
+
+  /* ─── Scene depth layers ─── */
+  .layer-bg { z-index: 0; }
+  .layer-environment { z-index: 1; }
+  .layer-content { z-index: 10; }
+  .layer-overlay { z-index: 20; }
+  .layer-cursor { z-index: 9999; }
 }
