@@ -54,13 +54,13 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             {loaded && (
-              <>
+              <SmoothScroll>
                 <CursorGlow />
                 <ScrollProgressBar />
                 <Navbar />
                 <AnimatedRoutes />
                 <Footer />
-              </>
+              </SmoothScroll>
             )}
           </AuthProvider>
         </BrowserRouter>
