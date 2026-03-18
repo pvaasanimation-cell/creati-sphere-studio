@@ -1,7 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Play, Sparkles, Zap, Globe } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ParticleField from "@/components/ParticleField";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
@@ -14,6 +16,8 @@ import cosmicDreams from "@/assets/work-cosmic-dreams.jpg";
 import neonCity from "@/assets/work-neon-city.jpg";
 import abstractFlow from "@/assets/work-abstract-flow.jpg";
 import digitalWorlds from "@/assets/work-digital-worlds.jpg";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const transition = { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
 
@@ -38,18 +42,6 @@ const featuredMembers = [
   { name: "Yuki", role: "VFX Artist", country: "Japan" },
 ];
 
-/* ─── Parallax wrapper ─── */
-const ParallaxSection = ({ children, offset = 50, className = "" }: { children: React.ReactNode; offset?: number; className?: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [offset, -offset]);
-  return (
-    <div ref={ref} className={className}>
-      <motion.div style={{ y }}>{children}</motion.div>
-    </div>
-  );
-};
-
 /* ─── Cinematic divider ─── */
 const CinematicDivider = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -62,10 +54,7 @@ const CinematicDivider = () => {
       <div className="container mx-auto px-6">
         <motion.div style={{ opacity }} className="flex items-center gap-4">
           <motion.div style={{ scaleX, transformOrigin: "left" }} className="flex-1 h-px gradient-bg-purple-cyan" />
-          <motion.div
-            style={{ opacity }}
-            className="w-2 h-2 rounded-full bg-primary animate-pulse-glow"
-          />
+          <motion.div style={{ opacity }} className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
           <motion.div style={{ scaleX, transformOrigin: "right" }} className="flex-1 h-px gradient-bg-purple-cyan" />
         </motion.div>
       </div>
@@ -73,9 +62,28 @@ const CinematicDivider = () => {
   );
 };
 
-/* ─── Work card with cinematic hover ─── */
+/* ─── Work card ─── */
 const WorkCard = ({ work, index }: { work: typeof works[0]; index: number }) => {
   const [hovered, setHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // GSAP 3D tilt
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const handleMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const rotateY = ((e.clientX - rect.left - rect.width / 2) / rect.width) * 6;
+      const rotateX = ((rect.top + rect.height / 2 - e.clientY) / rect.height) * 4;
+      gsap.to(el, { rotateX, rotateY, duration: 0.3, ease: "power2.out", transformPerspective: 1000 });
+    };
+    const handleLeave = () => {
+      gsap.to(el, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" });
+    };
+    el.addEventListener("mousemove", handleMove);
+    el.addEventListener("mouseleave", handleLeave);
+    return () => { el.removeEventListener("mousemove", handleMove); el.removeEventListener("mouseleave", handleLeave); };
+  }, []);
 
   return (
     <motion.div
@@ -86,82 +94,98 @@ const WorkCard = ({ work, index }: { work: typeof works[0]; index: number }) => 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <GlassCard className="p-0 overflow-hidden cursor-pointer group border-glow">
-        <div className="aspect-[16/10] overflow-hidden relative">
-          <motion.img
-            src={work.image}
-            alt={work.title}
-            className="w-full h-full object-cover"
-            animate={{ scale: hovered ? 1.08 : 1, filter: hovered ? "brightness(1.1)" : "brightness(0.8)" }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            loading="lazy"
-          />
-          {/* Cinematic overlay */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
-            animate={{ opacity: hovered ? 0.4 : 0.7 }}
-            transition={{ duration: 0.5 }}
-          />
-          {/* Glow border on hover */}
-          <motion.div
-            className="absolute inset-0 rounded-xl"
-            animate={{ boxShadow: hovered ? "inset 0 0 30px rgba(124, 58, 237, 0.15)" : "inset 0 0 0 transparent" }}
-            transition={{ duration: 0.5 }}
-          />
-          {/* Category badge */}
-          <motion.div
-            className="absolute top-4 left-4 px-3 py-1 rounded-full glass text-xs font-medium text-primary"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            {work.category}
-          </motion.div>
-        </div>
-        <div className="p-6 relative">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-interface text-primary">{work.category}</span>
-              <h3 className="text-xl font-bold text-foreground mt-1">{work.title}</h3>
-            </div>
+      <div ref={cardRef} style={{ transformStyle: "preserve-3d" }}>
+        <GlassCard className="p-0 overflow-hidden cursor-pointer group border-glow">
+          <div className="aspect-[16/10] overflow-hidden relative">
+            <motion.img
+              src={work.image}
+              alt={work.title}
+              className="w-full h-full object-cover"
+              animate={{ scale: hovered ? 1.08 : 1, filter: hovered ? "brightness(1.1)" : "brightness(0.8)" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              loading="lazy"
+            />
             <motion.div
-              animate={{ x: hovered ? 0 : -10, opacity: hovered ? 1 : 0 }}
+              className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"
+              animate={{ opacity: hovered ? 0.4 : 0.7 }}
+              transition={{ duration: 0.5 }}
+            />
+            <motion.div
+              className="absolute inset-0 rounded-xl"
+              animate={{ boxShadow: hovered ? "inset 0 0 30px rgba(124, 58, 237, 0.15)" : "inset 0 0 0 transparent" }}
+              transition={{ duration: 0.5 }}
+            />
+            <motion.div
+              className="absolute top-4 left-4 px-3 py-1 rounded-full glass text-xs font-medium text-primary"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : -10 }}
               transition={{ duration: 0.3 }}
             >
-              <ArrowRight size={18} className="text-primary" />
+              {work.category}
             </motion.div>
           </div>
-        </div>
-      </GlassCard>
+          <div className="p-6 relative" style={{ transform: "translateZ(15px)" }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-interface text-primary">{work.category}</span>
+                <h3 className="text-xl font-bold text-foreground mt-1">{work.title}</h3>
+              </div>
+              <motion.div animate={{ x: hovered ? 0 : -10, opacity: hovered ? 1 : 0 }} transition={{ duration: 0.3 }}>
+                <ArrowRight size={18} className="text-primary" />
+              </motion.div>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
     </motion.div>
   );
 };
 
-/* ─── Service card with depth ─── */
+/* ─── Service card ─── */
 const ServiceCard = ({ service, index }: { service: typeof services[0]; index: number }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
-  const rotateX = useTransform(scrollYProgress, [0, 1], [15, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const handleMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const rotateY = ((e.clientX - rect.left - rect.width / 2) / rect.width) * 10;
+      const rotateX = ((rect.top + rect.height / 2 - e.clientY) / rect.height) * 6;
+      gsap.to(el, { rotateX, rotateY, duration: 0.3, ease: "power2.out", transformPerspective: 800 });
+    };
+    const handleLeave = () => {
+      gsap.to(el, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" });
+    };
+    el.addEventListener("mousemove", handleMove);
+    el.addEventListener("mouseleave", handleLeave);
+    return () => { el.removeEventListener("mousemove", handleMove); el.removeEventListener("mouseleave", handleLeave); };
+  }, []);
 
   return (
-    <motion.div ref={ref} style={{ rotateX, opacity, transformPerspective: 1000 }}>
-      <GlassCard className="p-6 h-full relative overflow-hidden group border-glow">
-        {/* Ambient glow */}
-        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-3xl bg-primary" />
-        <div className="relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors duration-500">
-            <service.icon size={24} className="text-primary" />
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ ...transition, delay: index * 0.1 }}
+    >
+      <div ref={ref} style={{ transformStyle: "preserve-3d" }}>
+        <GlassCard className="p-6 h-full relative overflow-hidden group border-glow">
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-700 blur-3xl bg-primary" />
+          <div className="relative z-10" style={{ transform: "translateZ(15px)" }}>
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors duration-500">
+              <service.icon size={24} className="text-primary" />
+            </div>
+            <h3 className="font-bold text-foreground mb-2 text-lg">{service.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{service.desc}</p>
           </div>
-          <h3 className="font-bold text-foreground mb-2 text-lg">{service.title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{service.desc}</p>
-        </div>
-      </GlassCard>
+        </GlassCard>
+      </div>
     </motion.div>
   );
 };
 
-/* ─── Member card with animation ─── */
+/* ─── Member card ─── */
 const MemberCard = ({ member, index }: { member: typeof featuredMembers[0]; index: number }) => (
   <motion.div
     initial={{ opacity: 0, y: 40, rotateY: -10 }}
@@ -171,7 +195,6 @@ const MemberCard = ({ member, index }: { member: typeof featuredMembers[0]; inde
     style={{ transformPerspective: 800 }}
   >
     <GlassCard className="p-6 text-center relative overflow-hidden group border-glow">
-      {/* Animated border glow */}
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"
         style={{ background: "conic-gradient(from 0deg, transparent, rgba(124,58,237,0.1), transparent, rgba(6,182,212,0.1), transparent)" }}
       />
@@ -195,6 +218,7 @@ const MemberCard = ({ member, index }: { member: typeof featuredMembers[0]; inde
   </motion.div>
 );
 
+/* ═══ Main Page ═══ */
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: heroScroll } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
@@ -204,38 +228,55 @@ const Index = () => {
   const heroBlur = useTransform(heroScroll, [0, 0.8], [0, 10]);
   const heroFilter = useTransform(heroBlur, (v) => `blur(${v}px)`);
 
+  // GSAP section zoom transitions
+  useEffect(() => {
+    const sections = document.querySelectorAll("[data-gsap-section]");
+    sections.forEach((section) => {
+      gsap.fromTo(
+        section,
+        { scale: 0.96, opacity: 0.5 },
+        {
+          scale: 1,
+          opacity: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "top 40%",
+            scrub: 1.2,
+          },
+        }
+      );
+    });
+
+    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
+  }, []);
+
   return (
     <div className="noise-bg">
       {/* ═══ HERO ═══ */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Layer 1: WebGL Particles */}
         <ParticleField />
 
-        {/* Layer 2: Parallax background */}
         <motion.div className="absolute inset-0 z-[1]" style={{ y: heroBgY }}>
           <img src={heroBg} alt="" className="w-full h-full object-cover opacity-15" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
         </motion.div>
 
-        {/* Layer 3: Ambient orbs */}
+        {/* Ambient orbs */}
         <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
           <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" style={{ animationDelay: "3s" }} />
           <div className="absolute top-1/2 right-1/3 w-[200px] h-[200px] rounded-full bg-accent/5 blur-[60px] animate-breathe" style={{ animationDelay: "5s" }} />
         </div>
 
-        {/* Layer 4: Content */}
-        <motion.div 
-          style={{ opacity: heroOpacity, scale: heroScale, filter: heroFilter }} 
+        <motion.div
+          style={{ opacity: heroOpacity, scale: heroScale, filter: heroFilter }}
           className="relative z-10 container mx-auto px-6"
         >
           <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-12">
             <div className="flex-1 text-center lg:text-left">
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...transition, delay: 0.3 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.3 }}>
                 <motion.span
                   initial={{ opacity: 0, letterSpacing: "0.5em" }}
                   animate={{ opacity: 1, letterSpacing: "0.15em" }}
@@ -307,7 +348,7 @@ const Index = () => {
       </section>
 
       {/* ═══ STATS ═══ */}
-      <section className="py-24 border-y border-border/50 relative z-10">
+      <section data-gsap-section className="py-24 border-y border-border/50 relative z-10 will-change-transform">
         <div className="absolute inset-0 gradient-bg-subtle opacity-50" />
         <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
           <AnimatedCounter end={156} label="Members" suffix="+" />
@@ -320,15 +361,9 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ FEATURED WORKS ═══ */}
-      <section className="py-[12vh] relative z-10">
+      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
         <div className="container mx-auto px-6">
-          <ParallaxSection offset={30}>
-            <SectionHeading
-              tag="Portfolio"
-              title="Featured Works"
-              description="A curated selection of our most ambitious projects."
-            />
-          </ParallaxSection>
+          <SectionHeading tag="Portfolio" title="Featured Works" description="A curated selection of our most ambitious projects." />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {works.map((work, i) => (
               <WorkCard key={work.title} work={work} index={i} />
@@ -358,15 +393,9 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ SERVICES ═══ */}
-      <section className="py-[12vh] relative z-10">
+      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
         <div className="container mx-auto px-6">
-          <ParallaxSection offset={20}>
-            <SectionHeading
-              tag="Services"
-              title="What We Create"
-              description="From concept to final render, we bring visions to life."
-            />
-          </ParallaxSection>
+          <SectionHeading tag="Services" title="What We Create" description="From concept to final render, we bring visions to life." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((s, i) => (
               <ServiceCard key={s.title} service={s} index={i} />
@@ -378,20 +407,16 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ INTERACTIVE PLAYGROUND ═══ */}
-      <InteractivePlayground />
+      <div data-gsap-section className="will-change-transform">
+        <InteractivePlayground />
+      </div>
 
       <CinematicDivider />
 
       {/* ═══ FEATURED MEMBERS ═══ */}
-      <section className="py-[12vh] relative z-10">
+      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
         <div className="container mx-auto px-6">
-          <ParallaxSection offset={20}>
-            <SectionHeading
-              tag="Community"
-              title="Featured Creators"
-              description="Meet the talented artists behind our work."
-            />
-          </ParallaxSection>
+          <SectionHeading tag="Community" title="Featured Creators" description="Meet the talented artists behind our work." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredMembers.map((m, i) => (
               <MemberCard key={m.name} member={m} index={i} />
@@ -403,10 +428,9 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ CTA ═══ */}
-      <section className="py-[12vh] relative z-10">
+      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
         <div className="container mx-auto px-6">
           <GlassCard className="p-12 md:p-20 text-center relative overflow-hidden border-glow" hover={false}>
-            {/* Background orbs */}
             <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] animate-breathe" />
             <div className="absolute bottom-0 right-1/4 w-[200px] h-[200px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" />
 
