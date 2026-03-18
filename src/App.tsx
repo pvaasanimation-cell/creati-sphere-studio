@@ -11,6 +11,7 @@ import CinematicLoader from "@/components/CinematicLoader";
 import ScrollProgressBar from "@/components/ScrollProgressBar";
 import PageTransition from "@/components/PageTransition";
 import CursorGlow from "@/components/CursorGlow";
+import SmoothScroll from "@/components/SmoothScroll";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Works from "./pages/Works";
@@ -53,13 +54,13 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             {loaded && (
-              <>
+              <SmoothScroll>
                 <CursorGlow />
                 <ScrollProgressBar />
                 <Navbar />
                 <AnimatedRoutes />
                 <Footer />
-              </>
+              </SmoothScroll>
             )}
           </AuthProvider>
         </BrowserRouter>
