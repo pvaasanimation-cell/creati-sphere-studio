@@ -5,6 +5,7 @@ import { ArrowRight, Play, Sparkles, Zap, Globe } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ParticleField from "@/components/ParticleField";
+import TextReveal from "@/components/TextReveal";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
