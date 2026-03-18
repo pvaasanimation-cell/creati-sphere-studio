@@ -287,14 +287,15 @@ const Index = () => {
                   PVAAS Animation Studio
                 </motion.span>
                 <h1 className="text-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] mb-6 text-foreground leading-[1.02]">
-                  Where Creativity
+                  <TextReveal variant="words" className="inline" delay={0.4}>Where Creativity</TextReveal>
                   <br />
-                  <span className="gradient-purple-cyan inline-block">Becomes Motion</span>
+                  <span className="gradient-purple-cyan inline-block">
+                    <TextReveal variant="letters" className="inline" delay={0.8}>Becomes Motion</TextReveal>
+                  </span>
                 </h1>
-                <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
-                  A global collective of motion designers, 3D artists, and code-poets.
-                  We don't just build frames — we build <em className="text-foreground not-italic font-medium">worlds</em>.
-                </p>
+                <TextReveal variant="blur" delay={1} as="p" className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+                  A global collective of motion designers, 3D artists, and code-poets. We don't just build frames — we build worlds.
+                </TextReveal>
               </motion.div>
 
               <motion.div
