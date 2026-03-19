@@ -429,7 +429,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ CTA ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <GlassCard className="p-12 md:p-20 text-center relative overflow-hidden border-glow" hover={false}>
             <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] animate-breathe" />

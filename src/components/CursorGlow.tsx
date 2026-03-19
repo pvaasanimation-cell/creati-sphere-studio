@@ -34,42 +34,11 @@ const CursorGlow = () => {
       mouseY = e.clientY;
     };
 
-    // Magnetic hover on buttons/links
-    const magneticElements = new Set<HTMLElement>();
-    const setupMagnetic = () => {
-      document.querySelectorAll("a, button, [data-magnetic]").forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        if (magneticElements.has(htmlEl)) return;
-        magneticElements.add(htmlEl);
-
-        htmlEl.addEventListener("mousemove", (e: Event) => {
-          const me = e as MouseEvent;
-          const rect = htmlEl.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          const dx = (me.clientX - cx) * 0.15;
-          const dy = (me.clientY - cy) * 0.15;
-          htmlEl.style.transform = `translate(${dx}px, ${dy}px)`;
-          htmlEl.style.transition = "transform 0.2s ease-out";
-        });
-
-        htmlEl.addEventListener("mouseleave", () => {
-          htmlEl.style.transform = "";
-          htmlEl.style.transition = "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)";
-        });
-      });
-    };
-
-    // Initial setup + observe DOM changes
-    setupMagnetic();
-    const observer = new MutationObserver(setupMagnetic);
-    observer.observe(document.body, { childList: true, subtree: true });
-
     const animate = () => {
-      glowX += (mouseX - glowX) * 0.18;
-      glowY += (mouseY - glowY) * 0.18;
-      trailX += (mouseX - trailX) * 0.05;
-      trailY += (mouseY - trailY) * 0.05;
+      glowX += (mouseX - glowX) * 0.15;
+      glowY += (mouseY - glowY) * 0.15;
+      trailX += (mouseX - trailX) * 0.04;
+      trailY += (mouseY - trailY) * 0.04;
 
       if (glowRef.current) {
         glowRef.current.style.transform = `translate(${glowX - 20}px, ${glowY - 20}px)`;
@@ -80,7 +49,7 @@ const CursorGlow = () => {
       rafId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("click", handleClick);
     rafId = requestAnimationFrame(animate);
 
@@ -88,7 +57,6 @@ const CursorGlow = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("click", handleClick);
       cancelAnimationFrame(rafId);
-      observer.disconnect();
     };
   }, [isMobile, handleClick]);
 
