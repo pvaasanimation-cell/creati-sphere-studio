@@ -415,7 +415,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ FEATURED MEMBERS ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Community" title="Featured Creators" description="Meet the talented artists behind our work." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
