@@ -264,11 +264,10 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
         </motion.div>
 
-        {/* Ambient orbs */}
+        {/* Ambient orbs - simplified */}
         <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
-          <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" style={{ animationDelay: "3s" }} />
-          <div className="absolute top-1/2 right-1/3 w-[200px] h-[200px] rounded-full bg-accent/5 blur-[60px] animate-breathe" style={{ animationDelay: "5s" }} />
+          <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[80px]" />
+          <div className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] rounded-full bg-secondary/4 blur-[60px]" />
         </div>
 
         <motion.div
