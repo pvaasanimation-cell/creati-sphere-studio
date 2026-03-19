@@ -362,7 +362,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ FEATURED WORKS ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Portfolio" title="Featured Works" description="A curated selection of our most ambitious projects." />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
