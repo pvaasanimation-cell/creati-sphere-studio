@@ -394,7 +394,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ SERVICES ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Services" title="What We Create" description="From concept to final render, we bring visions to life." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
