@@ -349,7 +349,7 @@ const Index = () => {
       </section>
 
       {/* ═══ STATS ═══ */}
-      <section data-gsap-section className="py-24 border-y border-border/50 relative z-10 will-change-transform">
+      <section data-gsap-section className="py-24 border-y border-border/50 relative z-10">
         <div className="absolute inset-0 gradient-bg-subtle opacity-50" />
         <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
           <AnimatedCounter end={156} label="Members" suffix="+" />
