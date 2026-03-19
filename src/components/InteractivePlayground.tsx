@@ -28,8 +28,9 @@ function PlaygroundScene({
   const color2 = useMemo(() => new THREE.Color().setHSL((hue + 180) / 360, 0.7, 0.5), [hue]);
 
   const particlePositions = useMemo(() => {
-    const arr = new Float32Array(200 * 3);
-    for (let i = 0; i < 200; i++) {
+    const count = 80;
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
       arr[i * 3] = (Math.random() - 0.5) * 6;
       arr[i * 3 + 1] = (Math.random() - 0.5) * 6;
       arr[i * 3 + 2] = (Math.random() - 0.5) * 6;
