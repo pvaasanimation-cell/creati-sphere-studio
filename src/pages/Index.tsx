@@ -264,11 +264,10 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
         </motion.div>
 
-        {/* Ambient orbs */}
+        {/* Ambient orbs - simplified */}
         <div className="absolute inset-0 z-[2] pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px] animate-float" />
-          <div className="absolute bottom-1/3 right-1/4 w-[300px] h-[300px] rounded-full bg-secondary/5 blur-[80px] animate-float-slow" style={{ animationDelay: "3s" }} />
-          <div className="absolute top-1/2 right-1/3 w-[200px] h-[200px] rounded-full bg-accent/5 blur-[60px] animate-breathe" style={{ animationDelay: "5s" }} />
+          <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[80px]" />
+          <div className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] rounded-full bg-secondary/4 blur-[60px]" />
         </div>
 
         <motion.div
@@ -350,7 +349,7 @@ const Index = () => {
       </section>
 
       {/* ═══ STATS ═══ */}
-      <section data-gsap-section className="py-24 border-y border-border/50 relative z-10 will-change-transform">
+      <section data-gsap-section className="py-24 border-y border-border/50 relative z-10">
         <div className="absolute inset-0 gradient-bg-subtle opacity-50" />
         <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
           <AnimatedCounter end={156} label="Members" suffix="+" />
@@ -363,7 +362,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ FEATURED WORKS ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Portfolio" title="Featured Works" description="A curated selection of our most ambitious projects." />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -395,7 +394,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ SERVICES ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Services" title="What We Create" description="From concept to final render, we bring visions to life." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -409,14 +408,14 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ INTERACTIVE PLAYGROUND ═══ */}
-      <div data-gsap-section className="will-change-transform">
+      <div data-gsap-section>
         <InteractivePlayground />
       </div>
 
       <CinematicDivider />
 
       {/* ═══ FEATURED MEMBERS ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <SectionHeading tag="Community" title="Featured Creators" description="Meet the talented artists behind our work." />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -430,7 +429,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ CTA ═══ */}
-      <section data-gsap-section className="py-[12vh] relative z-10 will-change-transform">
+      <section data-gsap-section className="py-[12vh] relative z-10">
         <div className="container mx-auto px-6">
           <GlassCard className="p-12 md:p-20 text-center relative overflow-hidden border-glow" hover={false}>
             <div className="absolute top-0 left-1/4 w-[300px] h-[300px] rounded-full bg-primary/5 blur-[100px] animate-breathe" />

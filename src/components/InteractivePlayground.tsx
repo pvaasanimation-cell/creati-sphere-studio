@@ -28,8 +28,9 @@ function PlaygroundScene({
   const color2 = useMemo(() => new THREE.Color().setHSL((hue + 180) / 360, 0.7, 0.5), [hue]);
 
   const particlePositions = useMemo(() => {
-    const arr = new Float32Array(200 * 3);
-    for (let i = 0; i < 200; i++) {
+    const count = 80;
+    const arr = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
       arr[i * 3] = (Math.random() - 0.5) * 6;
       arr[i * 3 + 1] = (Math.random() - 0.5) * 6;
       arr[i * 3 + 2] = (Math.random() - 0.5) * 6;
@@ -162,7 +163,7 @@ const InteractivePlayground = () => {
           <div className="lg:col-span-2">
             <GlassCard className="p-0 overflow-hidden" hover={false}>
               <div style={{ height: isMobile ? "300px" : "450px" }}>
-                <Canvas camera={{ position: [0, 0, 4], fov: 50 }} dpr={isMobile ? [1, 1] : [1, 1.5]}>
+                <Canvas camera={{ position: [0, 0, 4], fov: 50 }} dpr={isMobile ? [1, 1] : [1, 1.25]} gl={{ antialias: false, powerPreference: "high-performance" }}>
                   <PlaygroundScene
                     speed={speed}
                     hue={hue}

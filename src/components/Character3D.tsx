@@ -4,50 +4,72 @@ import * as THREE from "three";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-/* ─── Stylized Robot Character built from primitives ─── */
-function CharacterBody({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+/* ─── Cute Chibi Mascot ─── */
+function ChibiCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
   const groupRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [clicked, setClicked] = useState(false);
   const clickAnim = useRef(0);
 
+  // Materials (memoized)
+  const mats = useMemo(() => ({
+    skin: new THREE.MeshStandardMaterial({ color: "#FFD5C2", roughness: 0.8, metalness: 0 }),
+    hair: new THREE.MeshStandardMaterial({ color: "#7C3AED", roughness: 0.5, metalness: 0.1 }),
+    hairHighlight: new THREE.MeshStandardMaterial({ color: "#A78BFA", roughness: 0.5, metalness: 0.1 }),
+    hoodie: new THREE.MeshStandardMaterial({ color: "#1E1B4B", roughness: 0.7, metalness: 0.05 }),
+    hoodieAccent: new THREE.MeshStandardMaterial({ color: "#7C3AED", roughness: 0.6, metalness: 0.1 }),
+    pants: new THREE.MeshStandardMaterial({ color: "#0F172A", roughness: 0.8, metalness: 0 }),
+    shoe: new THREE.MeshStandardMaterial({ color: "#06B6D4", roughness: 0.4, metalness: 0.2 }),
+    eyeWhite: new THREE.MeshStandardMaterial({ color: "#FFFFFF", roughness: 0.3 }),
+    iris: new THREE.MeshStandardMaterial({ color: "#06B6D4", emissive: "#06B6D4", emissiveIntensity: 0.4, roughness: 0.2 }),
+    pupil: new THREE.MeshStandardMaterial({ color: "#000000", roughness: 0.5 }),
+    eyeShine: new THREE.MeshStandardMaterial({ color: "#FFFFFF", emissive: "#FFFFFF", emissiveIntensity: 1 }),
+    mouth: new THREE.MeshStandardMaterial({ color: "#FF6B9D", roughness: 0.6 }),
+    blush: new THREE.MeshStandardMaterial({ color: "#FFB3BA", transparent: true, opacity: 0.4, roughness: 1 }),
+    headphone: new THREE.MeshStandardMaterial({ color: "#1E1B4B", roughness: 0.3, metalness: 0.4 }),
+    headphoneGlow: new THREE.MeshStandardMaterial({ color: "#7C3AED", emissive: "#7C3AED", emissiveIntensity: 0.6, roughness: 0.2 }),
+    tablet: new THREE.MeshStandardMaterial({ color: "#1E293B", roughness: 0.3, metalness: 0.3 }),
+    tabletScreen: new THREE.MeshStandardMaterial({ color: "#06B6D4", emissive: "#06B6D4", emissiveIntensity: 0.5 }),
+    stylus: new THREE.MeshStandardMaterial({ color: "#F59E0B", metalness: 0.5, roughness: 0.3 }),
+  }), []);
+
   useFrame((state) => {
     if (!groupRef.current || !headRef.current) return;
     const t = state.clock.elapsedTime;
 
-    // Idle breathing
-    groupRef.current.position.y = Math.sin(t * 1.5) * 0.05 - 0.3;
+    // Gentle breathing
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.2;
 
-    // Head follows mouse
-    headRef.current.rotation.y = THREE.MathUtils.lerp(headRef.current.rotation.y, mouse.current.x * 0.4, 0.05);
-    headRef.current.rotation.x = THREE.MathUtils.lerp(headRef.current.rotation.x, -mouse.current.y * 0.2, 0.05);
+    // Head follows mouse softly
+    headRef.current.rotation.y = THREE.MathUtils.lerp(headRef.current.rotation.y, mouse.current.x * 0.35, 0.04);
+    headRef.current.rotation.x = THREE.MathUtils.lerp(headRef.current.rotation.x, -mouse.current.y * 0.15, 0.04);
 
-    // Click jump animation
+    // Click bounce
     if (clicked) {
       clickAnim.current += 0.15;
-      groupRef.current.position.y += Math.sin(clickAnim.current) * 0.3;
-      groupRef.current.rotation.y += 0.12;
+      groupRef.current.position.y += Math.sin(clickAnim.current) * 0.25;
+      groupRef.current.rotation.z = Math.sin(clickAnim.current * 2) * 0.1;
       if (clickAnim.current > Math.PI) {
         setClicked(false);
         clickAnim.current = 0;
-        groupRef.current.rotation.y = 0;
+        groupRef.current.rotation.z = 0;
       }
     }
 
     // Hover wave (right arm)
     const rightArm = groupRef.current.children.find((c) => c.name === "rightArm");
     if (rightArm) {
-      const targetZ = hovered ? -1.2 + Math.sin(t * 4) * 0.3 : 0;
-      rightArm.rotation.z = THREE.MathUtils.lerp(rightArm.rotation.z, targetZ, 0.08);
+      const targetZ = hovered ? -1.0 + Math.sin(t * 5) * 0.25 : 0.15;
+      rightArm.rotation.z = THREE.MathUtils.lerp(rightArm.rotation.z, targetZ, 0.06);
+    }
+
+    // Left arm gentle sway
+    const leftArm = groupRef.current.children.find((c) => c.name === "leftArm");
+    if (leftArm) {
+      leftArm.rotation.z = 0.15 + Math.sin(t * 0.8) * 0.05;
     }
   });
-
-  const purpleMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#7C3AED", metalness: 0.3, roughness: 0.6 }), []);
-  const cyanMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#06B6D4", metalness: 0.4, roughness: 0.5 }), []);
-  const darkMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#1a1a2e", metalness: 0.5, roughness: 0.4 }), []);
-  const whiteMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#ffffff", emissiveIntensity: 0.5 }), []);
-  const goldMat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#F59E0B", metalness: 0.6, roughness: 0.3 }), []);
 
   return (
     <group
@@ -56,76 +78,158 @@ function CharacterBody({ mouse }: { mouse: React.MutableRefObject<{ x: number; y
       onPointerOut={() => setHovered(false)}
       onClick={() => setClicked(true)}
     >
-      {/* Body (hoodie) */}
-      <mesh position={[0, -0.1, 0]} material={purpleMat}>
-        <capsuleGeometry args={[0.35, 0.5, 8, 16]} />
+      {/* ── Body (hoodie) ── */}
+      <mesh position={[0, -0.05, 0]} material={mats.hoodie}>
+        <capsuleGeometry args={[0.3, 0.4, 12, 20]} />
+      </mesh>
+      {/* Hoodie pocket stripe */}
+      <mesh position={[0, -0.15, 0.28]} material={mats.hoodieAccent}>
+        <boxGeometry args={[0.25, 0.06, 0.02]} />
+      </mesh>
+      {/* Hoodie logo circle */}
+      <mesh position={[0, 0.05, 0.3]} material={mats.hoodieAccent}>
+        <circleGeometry args={[0.06, 16]} />
       </mesh>
 
-      {/* Head */}
-      <group ref={headRef} position={[0, 0.7, 0]}>
-        <mesh material={darkMat}>
-          <sphereGeometry args={[0.32, 16, 16]} />
+      {/* ── Head ── */}
+      <group ref={headRef} position={[0, 0.65, 0]}>
+        {/* Main head - larger for chibi proportions */}
+        <mesh material={mats.skin}>
+          <sphereGeometry args={[0.38, 24, 24]} />
         </mesh>
-        {/* Visor / face screen */}
-        <mesh position={[0, 0, 0.25]} material={cyanMat}>
-          <boxGeometry args={[0.4, 0.18, 0.08]} />
+
+        {/* ── Hair ── */}
+        {/* Main hair volume */}
+        <mesh position={[0, 0.12, -0.02]} material={mats.hair}>
+          <sphereGeometry args={[0.39, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6]} />
         </mesh>
-        {/* Eyes */}
-        <mesh position={[-0.1, 0.02, 0.3]} material={whiteMat}>
-          <sphereGeometry args={[0.04, 8, 8]} />
+        {/* Fringe/bangs */}
+        <mesh position={[0, 0.18, 0.22]} material={mats.hair} rotation={[0.3, 0, 0]}>
+          <boxGeometry args={[0.55, 0.15, 0.15]} />
         </mesh>
-        <mesh position={[0.1, 0.02, 0.3]} material={whiteMat}>
-          <sphereGeometry args={[0.04, 8, 8]} />
+        {/* Side hair tufts */}
+        <mesh position={[-0.32, 0.05, 0.1]} material={mats.hair} rotation={[0, 0, 0.3]}>
+          <capsuleGeometry args={[0.06, 0.15, 6, 8]} />
         </mesh>
-        {/* Headphones */}
-        <mesh position={[-0.34, 0.05, 0]} material={purpleMat}>
-          <sphereGeometry args={[0.1, 8, 8]} />
+        <mesh position={[0.32, 0.05, 0.1]} material={mats.hair} rotation={[0, 0, -0.3]}>
+          <capsuleGeometry args={[0.06, 0.15, 6, 8]} />
         </mesh>
-        <mesh position={[0.34, 0.05, 0]} material={purpleMat}>
-          <sphereGeometry args={[0.1, 8, 8]} />
+        {/* Hair highlight streak */}
+        <mesh position={[0.1, 0.28, 0.18]} material={mats.hairHighlight} rotation={[0.4, 0.2, 0]}>
+          <boxGeometry args={[0.08, 0.1, 0.12]} />
         </mesh>
-        <mesh position={[0, 0.3, 0]} rotation={[0, 0, Math.PI / 2]} material={darkMat}>
-          <torusGeometry args={[0.3, 0.03, 8, 16, Math.PI]} />
+
+        {/* ── Eyes ── */}
+        {/* Left eye */}
+        <group position={[-0.12, -0.02, 0.32]}>
+          <mesh material={mats.eyeWhite}>
+            <sphereGeometry args={[0.08, 12, 12]} />
+          </mesh>
+          <mesh position={[0, 0, 0.04]} material={mats.iris}>
+            <sphereGeometry args={[0.055, 10, 10]} />
+          </mesh>
+          <mesh position={[0, 0, 0.07]} material={mats.pupil}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+          </mesh>
+          <mesh position={[0.02, 0.025, 0.08]} material={mats.eyeShine}>
+            <sphereGeometry args={[0.012, 6, 6]} />
+          </mesh>
+        </group>
+        {/* Right eye */}
+        <group position={[0.12, -0.02, 0.32]}>
+          <mesh material={mats.eyeWhite}>
+            <sphereGeometry args={[0.08, 12, 12]} />
+          </mesh>
+          <mesh position={[0, 0, 0.04]} material={mats.iris}>
+            <sphereGeometry args={[0.055, 10, 10]} />
+          </mesh>
+          <mesh position={[0, 0, 0.07]} material={mats.pupil}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+          </mesh>
+          <mesh position={[0.02, 0.025, 0.08]} material={mats.eyeShine}>
+            <sphereGeometry args={[0.012, 6, 6]} />
+          </mesh>
+        </group>
+
+        {/* ── Blush spots ── */}
+        <mesh position={[-0.2, -0.08, 0.3]} rotation={[0, -0.3, 0]} material={mats.blush}>
+          <circleGeometry args={[0.045, 12]} />
         </mesh>
-        {/* Antenna */}
-        <mesh position={[0, 0.35, 0]} material={goldMat}>
-          <cylinderGeometry args={[0.015, 0.015, 0.12, 6]} />
+        <mesh position={[0.2, -0.08, 0.3]} rotation={[0, 0.3, 0]} material={mats.blush}>
+          <circleGeometry args={[0.045, 12]} />
         </mesh>
-        <mesh position={[0, 0.42, 0]} material={goldMat}>
-          <sphereGeometry args={[0.035, 8, 8]} />
+
+        {/* ── Smile ── */}
+        <mesh position={[0, -0.12, 0.35]} rotation={[0.1, 0, 0]} material={mats.mouth}>
+          <torusGeometry args={[0.04, 0.012, 8, 12, Math.PI]} />
+        </mesh>
+
+        {/* ── Headphones ── */}
+        <mesh position={[-0.38, 0, 0]} material={mats.headphone}>
+          <capsuleGeometry args={[0.08, 0.06, 8, 12]} />
+        </mesh>
+        <mesh position={[0.38, 0, 0]} material={mats.headphone}>
+          <capsuleGeometry args={[0.08, 0.06, 8, 12]} />
+        </mesh>
+        {/* Headphone glow rings */}
+        <mesh position={[-0.39, 0, 0.04]} material={mats.headphoneGlow}>
+          <torusGeometry args={[0.05, 0.01, 8, 16]} />
+        </mesh>
+        <mesh position={[0.39, 0, 0.04]} material={mats.headphoneGlow}>
+          <torusGeometry args={[0.05, 0.01, 8, 16]} />
+        </mesh>
+        {/* Headband */}
+        <mesh position={[0, 0.32, -0.05]} rotation={[0, 0, Math.PI / 2]} material={mats.headphone}>
+          <torusGeometry args={[0.32, 0.025, 8, 20, Math.PI]} />
         </mesh>
       </group>
 
+      {/* ── Arms ── */}
       {/* Left arm */}
-      <mesh position={[-0.45, -0.05, 0]} rotation={[0, 0, 0.2]} material={cyanMat}>
-        <capsuleGeometry args={[0.08, 0.35, 6, 8]} />
+      <group name="leftArm" position={[-0.38, -0.02, 0]}>
+        <mesh rotation={[0, 0, 0.15]} material={mats.hoodie}>
+          <capsuleGeometry args={[0.07, 0.28, 8, 10]} />
+        </mesh>
+        {/* Hand */}
+        <mesh position={[0.02, -0.22, 0]} material={mats.skin}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+        </mesh>
+      </group>
+
+      {/* Right arm (waves) */}
+      <group name="rightArm" position={[0.38, -0.02, 0]}>
+        <mesh rotation={[0, 0, -0.15]} material={mats.hoodie}>
+          <capsuleGeometry args={[0.07, 0.28, 8, 10]} />
+        </mesh>
+        {/* Hand with stylus */}
+        <mesh position={[-0.02, -0.22, 0]} material={mats.skin}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+        </mesh>
+        <mesh position={[-0.02, -0.32, 0.02]} rotation={[0.2, 0, -0.3]} material={mats.stylus}>
+          <cylinderGeometry args={[0.01, 0.015, 0.18, 6]} />
+        </mesh>
+      </group>
+
+      {/* ── Legs ── */}
+      <mesh position={[-0.12, -0.55, 0]} material={mats.pants}>
+        <capsuleGeometry args={[0.07, 0.22, 8, 10]} />
+      </mesh>
+      <mesh position={[0.12, -0.55, 0]} material={mats.pants}>
+        <capsuleGeometry args={[0.07, 0.22, 8, 10]} />
       </mesh>
 
-      {/* Right arm (waves on hover) */}
-      <mesh name="rightArm" position={[0.45, -0.05, 0]} rotation={[0, 0, -0.2]} material={cyanMat}>
-        <capsuleGeometry args={[0.08, 0.35, 6, 8]} />
+      {/* ── Shoes ── */}
+      <mesh position={[-0.12, -0.75, 0.03]} material={mats.shoe}>
+        <boxGeometry args={[0.12, 0.06, 0.16]} />
       </mesh>
-
-      {/* Legs */}
-      <mesh position={[-0.15, -0.65, 0]} material={darkMat}>
-        <capsuleGeometry args={[0.08, 0.3, 6, 8]} />
-      </mesh>
-      <mesh position={[0.15, -0.65, 0]} material={darkMat}>
-        <capsuleGeometry args={[0.08, 0.3, 6, 8]} />
-      </mesh>
-
-      {/* Tablet in left hand */}
-      <mesh position={[-0.55, -0.3, 0.1]} rotation={[0.3, 0.5, 0.2]} material={darkMat}>
-        <boxGeometry args={[0.2, 0.15, 0.02]} />
-      </mesh>
-      <mesh position={[-0.55, -0.3, 0.12]} rotation={[0.3, 0.5, 0.2]} material={cyanMat}>
-        <boxGeometry args={[0.16, 0.11, 0.01]} />
+      <mesh position={[0.12, -0.75, 0.03]} material={mats.shoe}>
+        <boxGeometry args={[0.12, 0.06, 0.16]} />
       </mesh>
     </group>
   );
 }
 
-/* ─── Floating Tools ─── */
+/* ─── Floating creative tools ─── */
 function FloatingTools() {
   const groupRef = useRef<THREE.Group>(null);
 
@@ -133,76 +237,29 @@ function FloatingTools() {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
     groupRef.current.children.forEach((child, i) => {
-      child.position.y = Math.sin(t * 0.8 + i * 1.5) * 0.2 + (i % 2 ? 0.5 : -0.2);
-      child.rotation.y = t * 0.3 + i;
-      child.rotation.x = Math.sin(t * 0.5 + i) * 0.2;
+      child.position.y = Math.sin(t * 0.6 + i * 1.8) * 0.2 + (i % 2 ? 0.4 : -0.1);
+      child.rotation.y = t * 0.2 + i;
     });
   });
 
   return (
     <group ref={groupRef}>
-      {/* Pencil */}
-      <mesh position={[1.2, 0.5, -0.5]}>
-        <cylinderGeometry args={[0.02, 0.02, 0.3, 6]} />
-        <meshStandardMaterial color="#F59E0B" metalness={0.5} roughness={0.3} />
-      </mesh>
       {/* Star */}
-      <mesh position={[-1.3, 0.3, -0.3]}>
-        <octahedronGeometry args={[0.08]} />
-        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={0.3} transparent opacity={0.8} />
-      </mesh>
-      {/* Cube */}
-      <mesh position={[1, -0.3, 0.5]}>
-        <boxGeometry args={[0.1, 0.1, 0.1]} />
-        <meshStandardMaterial color="#06B6D4" emissive="#06B6D4" emissiveIntensity={0.2} wireframe />
+      <mesh position={[-1.1, 0.3, -0.3]}>
+        <octahedronGeometry args={[0.07]} />
+        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={0.4} transparent opacity={0.7} />
       </mesh>
       {/* Ring */}
-      <mesh position={[-1, -0.1, 0.4]}>
-        <torusGeometry args={[0.08, 0.02, 8, 16]} />
-        <meshStandardMaterial color="#F59E0B" transparent opacity={0.6} />
+      <mesh position={[1, -0.2, 0.3]}>
+        <torusGeometry args={[0.06, 0.015, 8, 12]} />
+        <meshStandardMaterial color="#F59E0B" transparent opacity={0.5} />
+      </mesh>
+      {/* Cube */}
+      <mesh position={[1.1, 0.5, -0.4]}>
+        <boxGeometry args={[0.08, 0.08, 0.08]} />
+        <meshStandardMaterial color="#06B6D4" emissive="#06B6D4" emissiveIntensity={0.2} wireframe />
       </mesh>
     </group>
-  );
-}
-
-/* ─── Floor Glow ─── */
-function GlowFloor() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-      <circleGeometry args={[2, 32]} />
-      <meshStandardMaterial color="#7C3AED" transparent opacity={0.08} />
-    </mesh>
-  );
-}
-
-/* ─── Mini Particles ─── */
-function MiniParticles() {
-  const ref = useRef<THREE.Points>(null);
-  const count = 60;
-
-  const positions = useMemo(() => {
-    const arr = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 4;
-      arr[i * 3 + 1] = (Math.random() - 0.5) * 3;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 3;
-    }
-    return arr;
-  }, []);
-
-  useFrame((state) => {
-    if (ref.current) {
-      ref.current.rotation.y = state.clock.elapsedTime * 0.03;
-    }
-  });
-
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial size={0.02} color="#7C3AED" transparent opacity={0.4} sizeAttenuation />
-    </points>
   );
 }
 
@@ -218,21 +275,24 @@ function CharacterScene() {
         mouse.current.y = (e.point.y / viewport.height) * 2;
       }}
     >
-      {/* Invisible plane for mouse tracking */}
       <mesh position={[0, 0, 1]} visible={false}>
         <planeGeometry args={[20, 20]} />
         <meshBasicMaterial />
       </mesh>
 
-      <ambientLight intensity={0.3} color="#06B6D4" />
-      <pointLight position={[3, 3, 3]} color="#7C3AED" intensity={0.8} />
-      <pointLight position={[-3, 2, 2]} color="#06B6D4" intensity={0.5} />
-      <spotLight position={[0, 4, 2]} angle={0.5} penumbra={0.5} intensity={0.8} color="#ffffff" />
+      <ambientLight intensity={0.5} color="#FFF5EE" />
+      <pointLight position={[3, 3, 3]} color="#7C3AED" intensity={0.6} />
+      <pointLight position={[-3, 2, 2]} color="#06B6D4" intensity={0.4} />
+      <spotLight position={[0, 4, 3]} angle={0.5} penumbra={0.5} intensity={0.7} color="#ffffff" />
 
-      <CharacterBody mouse={mouse} />
+      <ChibiCharacter mouse={mouse} />
       <FloatingTools />
-      <GlowFloor />
-      <MiniParticles />
+
+      {/* Floor glow */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.85, 0]}>
+        <circleGeometry args={[1.5, 24]} />
+        <meshStandardMaterial color="#7C3AED" transparent opacity={0.06} />
+      </mesh>
     </group>
   );
 }
@@ -251,8 +311,7 @@ const Character3D = () => {
   const [showBubble, setShowBubble] = useState(true);
 
   return (
-    <div className="relative w-full" style={{ height: isMobile ? "300px" : "450px" }}>
-      {/* Speech bubble */}
+    <div className="relative w-full" style={{ height: isMobile ? "280px" : "420px" }}>
       {showBubble && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -267,8 +326,9 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.3, 3.5], fov: 45 }}
-        dpr={isMobile ? [1, 1] : [1, 1.5]}
+        camera={{ position: [0, 0.3, 3.2], fov: 45 }}
+        dpr={isMobile ? [1, 1] : [1, 1.25]}
+        gl={{ antialias: false, powerPreference: "high-performance" }}
         style={{ cursor: "pointer" }}
       >
         <CharacterScene />

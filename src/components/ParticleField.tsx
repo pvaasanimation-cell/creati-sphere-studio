@@ -1,10 +1,10 @@
 import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-function Particles() {
+function Particles({ count }: { count: number }) {
   const meshRef = useRef<THREE.Points>(null);
-  const count = 800;
 
   const [positions, colors] = useMemo(() => {
     const pos = new Float32Array(count * 3);
@@ -24,12 +24,11 @@ function Particles() {
       col[i * 3 + 2] = c.b;
     }
     return [pos, col];
-  }, []);
+  }, [count]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
-    meshRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-    meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.01) * 0.1;
+    meshRef.current.rotation.y = state.clock.elapsedTime * 0.015;
   });
 
   return (
@@ -38,7 +37,7 @@ function Particles() {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.03} vertexColors transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.04} vertexColors transparent opacity={0.5} sizeAttenuation />
     </points>
   );
 }
@@ -48,11 +47,11 @@ function FloatingShapes() {
 
   useFrame((state) => {
     if (!groupRef.current) return;
-    groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+    const t = state.clock.elapsedTime;
+    groupRef.current.rotation.y = t * 0.03;
     groupRef.current.children.forEach((child, i) => {
-      child.position.y = Math.sin(state.clock.elapsedTime * 0.5 + i * 2) * 0.5;
-      child.rotation.x = state.clock.elapsedTime * 0.2 + i;
-      child.rotation.z = state.clock.elapsedTime * 0.1 + i;
+      child.position.y = Math.sin(t * 0.3 + i * 2) * 0.5;
+      child.rotation.x = t * 0.1 + i;
     });
   });
 
@@ -67,25 +66,28 @@ function FloatingShapes() {
         <meshStandardMaterial color="#06B6D4" transparent opacity={0.3} wireframe />
       </mesh>
       <mesh position={[0, -2, -1]}>
-        <torusGeometry args={[0.5, 0.15, 8, 20]} />
+        <torusGeometry args={[0.5, 0.15, 8, 16]} />
         <meshStandardMaterial color="#F59E0B" transparent opacity={0.2} wireframe />
-      </mesh>
-      <mesh position={[-2, 2, -4]}>
-        <dodecahedronGeometry args={[0.3]} />
-        <meshStandardMaterial color="#7C3AED" transparent opacity={0.25} wireframe />
       </mesh>
     </group>
   );
 }
 
 const ParticleField = () => {
+  const isMobile = useIsMobile();
+  const particleCount = isMobile ? 150 : 350;
+
   return (
     <div className="absolute inset-0 z-0">
-      <Canvas camera={{ position: [0, 0, 6], fov: 60 }} dpr={[1, 1.5]}>
+      <Canvas
+        camera={{ position: [0, 0, 6], fov: 60 }}
+        dpr={[1, isMobile ? 1 : 1.25]}
+        frameloop="always"
+        gl={{ antialias: false, powerPreference: "high-performance" }}
+      >
         <ambientLight intensity={0.2} />
         <pointLight position={[5, 5, 5]} color="#7C3AED" intensity={0.5} />
-        <pointLight position={[-5, -5, 5]} color="#06B6D4" intensity={0.3} />
-        <Particles />
+        <Particles count={particleCount} />
         <FloatingShapes />
       </Canvas>
     </div>
