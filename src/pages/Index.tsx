@@ -408,7 +408,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ INTERACTIVE PLAYGROUND ═══ */}
-      <div data-gsap-section className="will-change-transform">
+      <div data-gsap-section>
         <InteractivePlayground />
       </div>
 
