@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, useAnimations, OrbitControls } from "@react-three/drei";
+import { useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
