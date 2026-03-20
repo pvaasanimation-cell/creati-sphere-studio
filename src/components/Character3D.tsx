@@ -1,6 +1,6 @@
-import { useRef, useState, Suspense } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, OrbitControls } from "@react-three/drei";
+import { useGLTF, useAnimations, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,14 +8,35 @@ import { useIsMobile } from "@/hooks/use-mobile";
 /* ─── Custom GLB Character ─── */
 function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/models/character.glb");
+  const { scene, animations } = useGLTF("/models/character.glb");
+  const { actions, names } = useAnimations(animations, groupRef);
+
+  useEffect(() => {
+    // Play the first available animation, or all of them
+    if (names.length > 0) {
+      names.forEach((name) => {
+        const action = actions[name];
+        if (action) {
+          action.reset().fadeIn(0.5).play();
+          action.setLoop(THREE.LoopRepeat, Infinity);
+        }
+      });
+    }
+    return () => {
+      names.forEach((name) => {
+        actions[name]?.fadeOut(0.5);
+      });
+    };
+  }, [actions, names]);
 
   useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
 
-    // Gentle floating
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.05 - 0.5;
+    // Gentle floating only if no animations
+    if (names.length === 0) {
+      groupRef.current.position.y = Math.sin(t * 1.2) * 0.05 - 1.2;
+    }
 
     // Soft rotation following mouse
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
@@ -26,7 +47,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
   });
 
   return (
-    <group ref={groupRef} scale={1.2} position={[0, -0.5, 0]}>
+    <group ref={groupRef} scale={1.8} position={[0, -1.2, 0]}>
       <primitive object={scene} />
     </group>
   );
@@ -96,7 +117,7 @@ function CharacterScene() {
         <meshBasicMaterial />
       </mesh>
 
-      <ambientLight intensity={0.6} color="#FFF5EE" />
+      <ambientLight intensity={0.7} color="#FFF5EE" />
       <pointLight position={[3, 3, 3]} color="#7C3AED" intensity={0.6} />
       <pointLight position={[-3, 2, 2]} color="#06B6D4" intensity={0.4} />
       <spotLight position={[0, 4, 3]} angle={0.5} penumbra={0.5} intensity={0.8} color="#ffffff" />
@@ -108,7 +129,7 @@ function CharacterScene() {
       <FloatingAccents />
 
       {/* Floor glow */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
         <circleGeometry args={[1.5, 24]} />
         <meshStandardMaterial color="#7C3AED" transparent opacity={0.06} />
       </mesh>
@@ -130,7 +151,7 @@ const Character3D = () => {
   const [showBubble, setShowBubble] = useState(true);
 
   return (
-    <div className="relative w-full" style={{ height: isMobile ? "280px" : "420px" }}>
+    <div className="relative w-full" style={{ height: isMobile ? "320px" : "480px" }}>
       {showBubble && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -145,7 +166,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.5, 3.5], fov: 45 }}
+        camera={{ position: [0, 0.8, 4], fov: 45 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         style={{ cursor: "pointer" }}
