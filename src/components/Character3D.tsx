@@ -47,7 +47,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
   });
 
   return (
-    <group ref={groupRef} scale={1.8} position={[0, -1.2, 0]}>
+    <group ref={groupRef} scale={0.65} position={[0, -0.9, 0]} rotation={[0, 0, 0]}>
       <primitive object={scene} />
     </group>
   );
