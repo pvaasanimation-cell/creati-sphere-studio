@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, Shield } from "lucide-react";
+import { Menu, X, LogOut, Shield, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
@@ -37,8 +37,8 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg gradient-bg-purple-cyan flex items-center justify-center font-bold text-primary-foreground text-sm">
-            P
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+            <img src="/favicon.ico" alt="PVAAS" className="w-8 h-8 object-contain" />
           </div>
           <span className="font-bold text-lg tracking-tight text-foreground">
             PVAAS
@@ -73,9 +73,18 @@ const Navbar = () => {
           )}
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                {memberProfile?.name || "User"}
-              </span>
+              <Link to="/profile" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+                {(memberProfile as any)?.avatar_url ? (
+                  <img src={(memberProfile as any).avatar_url} alt="" className="w-7 h-7 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-7 h-7 rounded-lg gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground text-xs font-bold">
+                    {memberProfile?.name?.[0]?.toUpperCase() || <User size={14} />}
+                  </div>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {memberProfile?.name || "Profile"}
+                </span>
+              </Link>
               <button
                 onClick={signOut}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg glass text-sm text-foreground hover:bg-muted/50 transition-colors"
@@ -131,12 +140,17 @@ const Navbar = () => {
                 </Link>
               )}
               {user ? (
-                <button
-                  onClick={signOut}
-                  className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground text-left flex items-center gap-2"
-                >
-                  <LogOut size={14} /> Logout
-                </button>
+                <>
+                  <Link to="/profile" className="px-4 py-3 rounded-lg text-sm text-foreground hover:text-primary flex items-center gap-2">
+                    <User size={14} /> My Profile
+                  </Link>
+                  <button
+                    onClick={signOut}
+                    className="px-4 py-3 rounded-lg text-sm text-muted-foreground hover:text-foreground text-left flex items-center gap-2"
+                  >
+                    <LogOut size={14} /> Logout
+                  </button>
+                </>
               ) : (
                 <Link to="/auth" className="px-4 py-3 rounded-lg text-primary text-sm font-medium">
                   Join / Login

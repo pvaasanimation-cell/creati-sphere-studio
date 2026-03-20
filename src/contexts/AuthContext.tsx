@@ -11,6 +11,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, meta: { name: string; username: string; country: string }) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 export interface MemberProfile {
@@ -26,6 +27,7 @@ export interface MemberProfile {
   activity_score: number;
   online: boolean;
   created_at: string;
+  avatar_url: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .select("*")
       .eq("user_id", userId)
       .single();
-    if (data) setMemberProfile(data as MemberProfile);
+    if (data) setMemberProfile(data as unknown as MemberProfile);
   };
 
   const checkAdmin = async (userId: string) => {
@@ -58,6 +60,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const setOnline = async (online: boolean) => {
     await supabase.rpc("set_online_status", { is_online: online });
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
   useEffect(() => {
@@ -90,7 +96,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    // Set offline on page close
     const handleBeforeUnload = () => {
       if (user) {
         navigator.sendBeacon && setOnline(false);
@@ -115,7 +120,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (!error && data.user) {
-      // Create member profile using SECURITY DEFINER function (bypasses RLS)
       const { error: profileError } = await supabase.rpc("create_member_profile", {
         _user_id: data.user.id,
         _name: meta.name,
@@ -141,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, memberProfile, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, memberProfile, signUp, signIn, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
