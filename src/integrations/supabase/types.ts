@@ -17,6 +17,7 @@ export type Database = {
       members: {
         Row: {
           activity_score: number | null
+          avatar_url: string | null
           bio: string | null
           city: string | null
           country: string | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           activity_score?: number | null
+          avatar_url?: string | null
           bio?: string | null
           city?: string | null
           country?: string | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           activity_score?: number | null
+          avatar_url?: string | null
           bio?: string | null
           city?: string | null
           country?: string | null

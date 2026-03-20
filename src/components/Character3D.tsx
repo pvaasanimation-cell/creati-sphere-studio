@@ -50,13 +50,15 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
 
-    if (names.length === 0) {
-      groupRef.current.position.y = Math.sin(t * 1.2) * 0.05 - 0.9;
-    }
+    // Gentle idle bobbing + swaying animation
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.5;
+    groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03;
+    groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02;
 
+    // Follow mouse
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      mouse.current.x * 0.22,
+      mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1,
       0.04
     );
   });
