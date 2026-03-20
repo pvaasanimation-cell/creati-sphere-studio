@@ -1,6 +1,6 @@
-import { useRef, useState, useEffect, Suspense } from "react";
+import { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, useAnimations, OrbitControls } from "@react-three/drei";
+import { useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,8 +11,24 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
   const { scene, animations } = useGLTF("/models/character.glb");
   const { actions, names } = useAnimations(animations, groupRef);
 
+  const { normalizedScale, modelOffset } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+
+    box.getSize(size);
+    box.getCenter(center);
+
+    const safeHeight = Math.max(size.y, 0.001);
+    const targetHeight = 2.1;
+
+    return {
+      normalizedScale: targetHeight / safeHeight,
+      modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
+    };
+  }, [scene]);
+
   useEffect(() => {
-    // Play the first available animation, or all of them
     if (names.length > 0) {
       names.forEach((name) => {
         const action = actions[name];
@@ -22,6 +38,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
         }
       });
     }
+
     return () => {
       names.forEach((name) => {
         actions[name]?.fadeOut(0.5);
@@ -33,22 +50,20 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
 
-    // Gentle floating only if no animations
     if (names.length === 0) {
-      groupRef.current.position.y = Math.sin(t * 1.2) * 0.05 - 1.2;
+      groupRef.current.position.y = Math.sin(t * 1.2) * 0.05 - 0.9;
     }
 
-    // Soft rotation following mouse
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      mouse.current.x * 0.3 + Math.PI,
+      mouse.current.x * 0.22,
       0.04
     );
   });
 
   return (
-    <group ref={groupRef} scale={0.3} position={[0, -0.5, 0]} rotation={[0, 0, 0]}>
-      <primitive object={scene} />
+    <group ref={groupRef} scale={normalizedScale} position={[0, -0.9, 0]} rotation={[0, 0, 0]}>
+      <primitive object={scene} position={modelOffset} />
     </group>
   );
 }
