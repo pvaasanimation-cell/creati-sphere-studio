@@ -27,14 +27,10 @@ const MemberProfilePopup = ({ member, onClose }: MemberProfilePopupProps) => (
           onClick={(e) => e.stopPropagation()}
           className="glass-strong rounded-2xl max-w-md w-full overflow-hidden relative border-glow"
         >
-          {/* Background glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[200px] rounded-full bg-primary/10 blur-[80px]" />
 
           <div className="p-8 relative z-10">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 transition-colors"
-            >
+            <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground p-1 transition-colors">
               <X size={20} />
             </button>
 
@@ -43,9 +39,15 @@ const MemberProfilePopup = ({ member, onClose }: MemberProfilePopupProps) => (
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                className="w-20 h-20 rounded-2xl gradient-bg-purple-cyan mx-auto mb-4 flex items-center justify-center text-primary-foreground font-bold text-3xl"
+                className="w-20 h-20 rounded-2xl mx-auto mb-4 overflow-hidden"
               >
-                {member.name[0]?.toUpperCase()}
+                {(member as any).avatar_url ? (
+                  <img src={(member as any).avatar_url} alt={member.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground font-bold text-3xl">
+                    {member.name[0]?.toUpperCase()}
+                  </div>
+                )}
               </motion.div>
               <h2 className="text-2xl font-bold text-foreground">{member.name}</h2>
               <p className="text-primary font-medium mt-1">@{member.username}</p>
@@ -63,7 +65,7 @@ const MemberProfilePopup = ({ member, onClose }: MemberProfilePopupProps) => (
                   <Globe size={16} className="text-muted-foreground" />
                   <div>
                     <span className="text-xs text-muted-foreground">Location</span>
-                    <p className="text-sm text-foreground">{member.country}</p>
+                    <p className="text-sm text-foreground">{member.country}{member.city ? `, ${member.city}` : ""}</p>
                   </div>
                 </div>
               )}
