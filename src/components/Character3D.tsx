@@ -50,15 +50,31 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
 
-    // Gentle idle bobbing + swaying animation
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.5;
-    groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03;
-    groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02;
+    // Wave cycle: every ~6s, do a quick wave gesture for ~1.5s
+    const waveCycle = 6;
+    const wavePhase = t % waveCycle;
+    const isWaving = wavePhase < 1.5;
 
-    // Follow mouse
+    // Smooth wave envelope (ramps up then down)
+    const waveStrength = isWaving
+      ? Math.sin((wavePhase / 1.5) * Math.PI) // 0→1→0 over 1.5s
+      : 0;
+
+    // During wave: tilt side-to-side rapidly + lean forward slightly
+    const waveZ = waveStrength * Math.sin(t * 12) * 0.12;
+    const waveX = waveStrength * 0.08;
+    const waveBounce = waveStrength * Math.abs(Math.sin(t * 10)) * 0.06;
+
+    // Gentle idle bobbing + swaying animation
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.5 + waveBounce;
+    groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
+    groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
+
+    // Follow mouse (reduced during wave)
+    const mouseInfluence = 1 - waveStrength * 0.7;
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1,
+      (mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1) * mouseInfluence,
       0.04
     );
   });
