@@ -141,7 +141,7 @@ function CharacterScene() {
       <directionalLight position={[0, 5, 5]} intensity={0.4} />
 
       <Suspense fallback={<LoadingFallback />}>
-        <CustomCharacter mouse={mouse} targetHeight={targetHeight} />
+        <CustomCharacter mouse={mouse} />
       </Suspense>
       <FloatingAccents />
 
