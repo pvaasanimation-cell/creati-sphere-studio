@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ─── Custom GLB Character ─── */
-function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+function CustomCharacter({ mouse, targetHeight = 1.2 }: { mouse: React.MutableRefObject<{ x: number; y: number }>; targetHeight?: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF("/models/character.glb");
   const { actions, names } = useAnimations(animations, groupRef);
@@ -20,13 +20,13 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     box.getCenter(center);
 
     const safeHeight = Math.max(size.y, 0.001);
-    const targetHeight = 1.2;
+    const th = targetHeight;
 
     return {
-      normalizedScale: targetHeight / safeHeight,
+      normalizedScale: th / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
-  }, [scene]);
+  }, [scene, targetHeight]);
 
   useEffect(() => {
     if (names.length > 0) {
@@ -118,7 +118,7 @@ function LoadingFallback() {
 }
 
 /* ─── Scene ─── */
-function CharacterScene() {
+function CharacterScene({ targetHeight = 1.2 }: { targetHeight?: number }) {
   const mouse = useRef({ x: 0, y: 0 });
   const { viewport } = useThree();
 
@@ -141,7 +141,7 @@ function CharacterScene() {
       <directionalLight position={[0, 5, 5]} intensity={0.4} />
 
       <Suspense fallback={<LoadingFallback />}>
-        <CustomCharacter mouse={mouse} />
+        <CustomCharacter mouse={mouse} targetHeight={targetHeight} />
       </Suspense>
       <FloatingAccents />
 
@@ -166,9 +166,33 @@ const Character3D = () => {
   const isMobile = useIsMobile();
   const [greeting] = useState(() => greetings[Math.floor(Math.random() * greetings.length)]);
   const [showBubble, setShowBubble] = useState(true);
+  const [devScale, setDevScale] = useState(1.2);
+  const [showSlider, setShowSlider] = useState(false);
 
   return (
     <div className="relative w-full" style={{ height: isMobile ? "320px" : "480px" }}>
+      {/* Dev scale slider */}
+      <button
+        onClick={() => setShowSlider((s) => !s)}
+        className="absolute top-1 right-1 z-30 text-[10px] px-2 py-0.5 rounded bg-primary/20 text-primary hover:bg-primary/30"
+      >
+        {showSlider ? "Hide" : "Scale"}
+      </button>
+      {showSlider && (
+        <div className="absolute top-7 right-1 z-30 glass rounded-lg p-2 flex flex-col gap-1 min-w-[140px]">
+          <span className="text-[10px] text-muted-foreground">Target Height: {devScale.toFixed(2)}</span>
+          <input
+            type="range"
+            min="0.3"
+            max="3"
+            step="0.05"
+            value={devScale}
+            onChange={(e) => setDevScale(parseFloat(e.target.value))}
+            className="w-full accent-primary"
+          />
+        </div>
+      )}
+
       {showBubble && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -188,7 +212,7 @@ const Character3D = () => {
         gl={{ antialias: false, powerPreference: "high-performance" }}
         style={{ cursor: "pointer" }}
       >
-        <CharacterScene />
+        <CharacterScene targetHeight={devScale} />
       </Canvas>
     </div>
   );
