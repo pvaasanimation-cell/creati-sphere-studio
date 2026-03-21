@@ -23,7 +23,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     const targetHeight = 1.2;
 
     return {
-      normalizedScale: th / safeHeight,
+      normalizedScale: targetHeight / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
   }, [scene, targetHeight]);
