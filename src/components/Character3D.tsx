@@ -166,33 +166,9 @@ const Character3D = () => {
   const isMobile = useIsMobile();
   const [greeting] = useState(() => greetings[Math.floor(Math.random() * greetings.length)]);
   const [showBubble, setShowBubble] = useState(true);
-  const [devScale, setDevScale] = useState(1.2);
-  const [showSlider, setShowSlider] = useState(false);
 
   return (
     <div className="relative w-full" style={{ height: isMobile ? "320px" : "480px" }}>
-      {/* Dev scale slider */}
-      <button
-        onClick={() => setShowSlider((s) => !s)}
-        className="absolute top-1 right-1 z-30 text-[10px] px-2 py-0.5 rounded bg-primary/20 text-primary hover:bg-primary/30"
-      >
-        {showSlider ? "Hide" : "Scale"}
-      </button>
-      {showSlider && (
-        <div className="absolute top-7 right-1 z-30 glass rounded-lg p-2 flex flex-col gap-1 min-w-[140px]">
-          <span className="text-[10px] text-muted-foreground">Target Height: {devScale.toFixed(2)}</span>
-          <input
-            type="range"
-            min="0.3"
-            max="3"
-            step="0.05"
-            value={devScale}
-            onChange={(e) => setDevScale(parseFloat(e.target.value))}
-            className="w-full accent-primary"
-          />
-        </div>
-      )}
-
       {showBubble && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -212,7 +188,7 @@ const Character3D = () => {
         gl={{ antialias: false, powerPreference: "high-performance" }}
         style={{ cursor: "pointer" }}
       >
-        <CharacterScene targetHeight={devScale} />
+        <CharacterScene />
       </Canvas>
     </div>
   );
