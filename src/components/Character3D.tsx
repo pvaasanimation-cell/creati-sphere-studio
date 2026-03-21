@@ -26,7 +26,7 @@ function CustomCharacter({ mouse, targetHeight = 1.2 }: { mouse: React.MutableRe
       normalizedScale: th / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
-  }, [scene]);
+  }, [scene, targetHeight]);
 
   useEffect(() => {
     if (names.length > 0) {
