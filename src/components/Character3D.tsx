@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo, Suspense } from "react";
+import { useRef, useState, useMemo, useEffect, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ─── Custom GLB Character ─── */
-function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{ x: number; y: number }>; isHovered: React.MutableRefObject<boolean> }) {
   const groupRef = useRef<THREE.Group>(null);
+  const waveStrengthRef = useRef(0);
   const { scene, animations } = useGLTF("/models/character.glb");
   const { actions, names } = useAnimations(animations, groupRef);
 
@@ -15,13 +16,10 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
-
     box.getSize(size);
     box.getCenter(center);
-
     const safeHeight = Math.max(size.y, 0.001);
     const targetHeight = 1.2;
-
     return {
       normalizedScale: targetHeight / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
@@ -38,40 +36,32 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
         }
       });
     }
-
     return () => {
-      names.forEach((name) => {
-        actions[name]?.fadeOut(0.5);
-      });
+      names.forEach((name) => actions[name]?.fadeOut(0.5));
     };
   }, [actions, names]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
 
-    // Wave cycle: every ~6s, do a quick wave gesture for ~1.5s
-    const waveCycle = 6;
-    const wavePhase = t % waveCycle;
-    const isWaving = wavePhase < 1.5;
+    // Smoothly ramp waveStrength toward 1 on hover, 0 otherwise
+    const target = isHovered.current ? 1 : 0;
+    waveStrengthRef.current = THREE.MathUtils.lerp(waveStrengthRef.current, target, delta * 4);
+    const ws = waveStrengthRef.current;
 
-    // Smooth wave envelope (ramps up then down)
-    const waveStrength = isWaving
-      ? Math.sin((wavePhase / 1.5) * Math.PI) // 0→1→0 over 1.5s
-      : 0;
+    // Wave: tilt side-to-side + bounce
+    const waveZ = ws * Math.sin(t * 10) * 0.12;
+    const waveX = ws * 0.08;
+    const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    // During wave: tilt side-to-side rapidly + lean forward slightly
-    const waveZ = waveStrength * Math.sin(t * 12) * 0.12;
-    const waveX = waveStrength * 0.08;
-    const waveBounce = waveStrength * Math.abs(Math.sin(t * 10)) * 0.06;
-
-    // Gentle idle bobbing + swaying animation
+    // Idle bobbing
     groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.5 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
-    // Follow mouse (reduced during wave)
-    const mouseInfluence = 1 - waveStrength * 0.7;
+    // Mouse follow (reduced during wave)
+    const mouseInfluence = 1 - ws * 0.7;
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
       (mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1) * mouseInfluence,
@@ -80,7 +70,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
   });
 
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0, -0.9, 0]} rotation={[0, 0, 0]}>
+    <group ref={groupRef} scale={normalizedScale} position={[0, -0.9, 0]}>
       <primitive object={scene} position={modelOffset} />
     </group>
   );
@@ -121,9 +111,7 @@ function FloatingAccents() {
 function LoadingFallback() {
   const meshRef = useRef<THREE.Mesh>(null);
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime;
-    }
+    if (meshRef.current) meshRef.current.rotation.y = state.clock.elapsedTime;
   });
   return (
     <mesh ref={meshRef}>
@@ -134,7 +122,7 @@ function LoadingFallback() {
 }
 
 /* ─── Scene ─── */
-function CharacterScene() {
+function CharacterScene({ isHovered }: { isHovered: React.MutableRefObject<boolean> }) {
   const mouse = useRef({ x: 0, y: 0 });
   const { viewport } = useThree();
 
@@ -157,11 +145,10 @@ function CharacterScene() {
       <directionalLight position={[0, 5, 5]} intensity={0.4} />
 
       <Suspense fallback={<LoadingFallback />}>
-        <CustomCharacter mouse={mouse} />
+        <CustomCharacter mouse={mouse} isHovered={isHovered} />
       </Suspense>
       <FloatingAccents />
 
-      {/* Floor glow */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
         <circleGeometry args={[1.5, 24]} />
         <meshStandardMaterial color="#7C3AED" transparent opacity={0.06} />
@@ -182,9 +169,15 @@ const Character3D = () => {
   const isMobile = useIsMobile();
   const [greeting] = useState(() => greetings[Math.floor(Math.random() * greetings.length)]);
   const [showBubble, setShowBubble] = useState(true);
+  const isHovered = useRef(false);
 
   return (
-    <div className="relative w-full" style={{ height: isMobile ? "320px" : "480px" }}>
+    <div
+      className="relative w-full"
+      style={{ height: isMobile ? "320px" : "480px" }}
+      onMouseEnter={() => { isHovered.current = true; }}
+      onMouseLeave={() => { isHovered.current = false; }}
+    >
       {showBubble && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -202,15 +195,25 @@ const Character3D = () => {
         camera={{ position: [0, 0.8, 4], fov: 45 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
+        frameloop="demand"
         style={{ cursor: "pointer" }}
+        onCreated={({ invalidate }) => {
+          // Render at ~30fps instead of 60 to reduce GPU load
+          let raf: number;
+          const loop = () => {
+            invalidate();
+            raf = requestAnimationFrame(loop);
+          };
+          const interval = setInterval(() => { invalidate(); }, 33);
+          return () => { clearInterval(interval); cancelAnimationFrame(raf); };
+        }}
       >
-        <CharacterScene />
+        <CharacterScene isHovered={isHovered} />
       </Canvas>
     </div>
   );
 };
 
-// Preload the model
 useGLTF.preload("/models/character.glb");
 
 export default Character3D;
