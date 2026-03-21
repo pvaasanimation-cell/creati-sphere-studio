@@ -48,7 +48,9 @@ const AnimatedRoutes = () => {
 
 const AppContent = () => {
   const { user, loading } = useAuth();
-  const showGate = !loading && !user;
+  const location = useLocation();
+  const isAuthPage = location.pathname === "/auth";
+  const showGate = !loading && !user && !isAuthPage;
 
   return (
     <>
