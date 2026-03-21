@@ -118,7 +118,7 @@ function LoadingFallback() {
 }
 
 /* ─── Scene ─── */
-function CharacterScene() {
+function CharacterScene({ targetHeight = 1.2 }: { targetHeight?: number }) {
   const mouse = useRef({ x: 0, y: 0 });
   const { viewport } = useThree();
 
