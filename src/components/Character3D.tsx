@@ -23,7 +23,7 @@ function CustomCharacter({ mouse, targetHeight = 1.2 }: { mouse: React.MutableRe
     const th = targetHeight;
 
     return {
-      normalizedScale: targetHeight / safeHeight,
+      normalizedScale: th / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
   }, [scene]);
