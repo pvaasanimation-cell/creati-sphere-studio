@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ─── Custom GLB Character ─── */
-function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number; y: number }> }) {
+function CustomCharacter({ mouse, targetHeight = 1.2 }: { mouse: React.MutableRefObject<{ x: number; y: number }>; targetHeight?: number }) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene, animations } = useGLTF("/models/character.glb");
   const { actions, names } = useAnimations(animations, groupRef);
