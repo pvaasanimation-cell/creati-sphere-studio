@@ -20,7 +20,7 @@ function CustomCharacter({ mouse }: { mouse: React.MutableRefObject<{ x: number;
     box.getCenter(center);
 
     const safeHeight = Math.max(size.y, 0.001);
-    const th = targetHeight;
+    const targetHeight = 1.2;
 
     return {
       normalizedScale: th / safeHeight,
