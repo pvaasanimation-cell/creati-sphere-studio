@@ -273,7 +273,7 @@ const Index = () => {
 
       {/* ═══ INTERACTIVE PLAYGROUND ═══ */}
       <div data-gsap-section>
-        <InteractivePlayground />
+        <Suspense fallback={null}><InteractivePlayground /></Suspense>
       </div>
 
       <CinematicDivider />
