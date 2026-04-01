@@ -22,6 +22,7 @@ import Join from "./pages/Join";
 import Auth from "./pages/Auth";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const AnimatedRoutes = () => {
         <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
         <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
         <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
@@ -49,7 +51,7 @@ const AnimatedRoutes = () => {
 const AppContent = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const isAuthPage = location.pathname === "/auth";
+  const isAuthPage = ["/auth", "/reset-password"].includes(location.pathname);
   const showGate = !loading && !user && !isAuthPage;
 
   return (

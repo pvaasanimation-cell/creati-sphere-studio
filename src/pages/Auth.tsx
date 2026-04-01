@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, UserPlus, LogIn, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
 import { toast } from "sonner";
 
 const transition = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
-type AuthMode = "gate" | "signup" | "login" | "admin-login";
+type AuthMode = "gate" | "signup" | "login" | "admin-login" | "forgot";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -19,7 +20,6 @@ const Auth = () => {
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) navigate("/", { replace: true });
   }, [user, navigate]);
@@ -66,6 +66,25 @@ const Auth = () => {
     } else {
       toast.success("Welcome back!");
       navigate("/");
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password reset link sent! Check your email.");
+      setMode("login");
     }
   };
 
@@ -161,6 +180,29 @@ const Auth = () => {
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" required />
                 <button type="submit" disabled={loading} className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 ${mode === "admin-login" ? "bg-accent text-accent-foreground hover:shadow-[0_0_40px_rgba(245,158,11,0.3)]" : "gradient-bg-purple-cyan text-primary-foreground hover:shadow-[0_0_40px_rgba(124,58,237,0.3)]"}`}>
                   {loading ? "Signing in..." : "Login"}
+                </button>
+              </form>
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="w-full mt-3 text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </GlassCard>
+          </motion.div>
+        )}
+
+        {mode === "forgot" && (
+          <motion.div key="forgot" initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }} transition={transition} className="relative z-10 w-full max-w-md">
+            <button onClick={() => setMode("login")} className="text-sm text-muted-foreground hover:text-foreground mb-6 flex items-center gap-1">← Back to Login</button>
+            <GlassCard className="p-8" hover={false}>
+              <h2 className="text-display text-2xl text-foreground mb-1">Forgot Password</h2>
+              <p className="text-sm text-muted-foreground mb-6">We'll send you a reset link</p>
+              <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
+                <input type="email" placeholder="Your email address" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" required maxLength={255} />
+                <button type="submit" disabled={loading} className="w-full py-3 rounded-xl gradient-bg-purple-cyan text-primary-foreground font-semibold transition-all duration-300 hover:shadow-[0_0_40px_rgba(124,58,237,0.3)] hover:-translate-y-0.5 disabled:opacity-50">
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </button>
               </form>
             </GlassCard>
