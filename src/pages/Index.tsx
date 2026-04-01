@@ -1,20 +1,22 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Play, Zap, Globe } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ParticleField from "@/components/ParticleField";
 import TextReveal from "@/components/TextReveal";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
-import ScrollStorySection from "@/components/ScrollStorySection";
-import Character3D from "@/components/Character3D";
-import InteractivePlayground from "@/components/InteractivePlayground";
 import heroBg from "@/assets/hero-bg.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import type { MemberProfile } from "@/contexts/AuthContext";
+
+// Lazy-load heavy 3D components
+const ParticleField = lazy(() => import("@/components/ParticleField"));
+const Character3D = lazy(() => import("@/components/Character3D"));
+const ScrollStorySection = lazy(() => import("@/components/ScrollStorySection"));
+const InteractivePlayground = lazy(() => import("@/components/InteractivePlayground"));
 
 gsap.registerPlugin(ScrollTrigger);
 
