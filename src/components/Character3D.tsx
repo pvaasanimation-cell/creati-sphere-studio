@@ -138,11 +138,8 @@ function CharacterScene({ isHovered }: { isHovered: React.MutableRefObject<boole
         <meshBasicMaterial />
       </mesh>
 
-      <ambientLight intensity={0.7} color="#FFF5EE" />
-      <pointLight position={[3, 3, 3]} color="#7C3AED" intensity={0.6} />
-      <pointLight position={[-3, 2, 2]} color="#06B6D4" intensity={0.4} />
-      <spotLight position={[0, 4, 3]} angle={0.5} penumbra={0.5} intensity={0.8} color="#ffffff" />
-      <directionalLight position={[0, 5, 5]} intensity={0.4} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[3, 5, 2]} intensity={1} />
 
       <Suspense fallback={<LoadingFallback />}>
         <CustomCharacter mouse={mouse} isHovered={isHovered} />
