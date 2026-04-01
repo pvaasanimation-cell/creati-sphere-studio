@@ -253,7 +253,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ SCROLL STORY ═══ */}
-      <ScrollStorySection />
+      <Suspense fallback={null}><ScrollStorySection /></Suspense>
 
       <CinematicDivider />
 
