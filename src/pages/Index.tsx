@@ -1,20 +1,22 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Play, Zap, Globe } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ParticleField from "@/components/ParticleField";
 import TextReveal from "@/components/TextReveal";
 import GlassCard from "@/components/GlassCard";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import SectionHeading from "@/components/SectionHeading";
-import ScrollStorySection from "@/components/ScrollStorySection";
-import Character3D from "@/components/Character3D";
-import InteractivePlayground from "@/components/InteractivePlayground";
 import heroBg from "@/assets/hero-bg.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import type { MemberProfile } from "@/contexts/AuthContext";
+
+// Lazy-load heavy 3D components
+const ParticleField = lazy(() => import("@/components/ParticleField"));
+const Character3D = lazy(() => import("@/components/Character3D"));
+const ScrollStorySection = lazy(() => import("@/components/ScrollStorySection"));
+const InteractivePlayground = lazy(() => import("@/components/InteractivePlayground"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -173,7 +175,9 @@ const Index = () => {
     <div className="noise-bg">
       {/* ═══ HERO ═══ */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <ParticleField />
+        <Suspense fallback={null}>
+          <ParticleField />
+        </Suspense>
         <motion.div className="absolute inset-0 z-[1]" style={{ y: heroBgY }}>
           <img src={heroBg} alt="" className="w-full h-full object-cover opacity-15" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
@@ -220,7 +224,9 @@ const Index = () => {
             </div>
 
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...transition, delay: 0.5 }} className="flex-1 w-full max-w-lg">
-              <Character3D />
+              <Suspense fallback={<div className="w-full h-[320px]" />}>
+                <Character3D />
+              </Suspense>
             </motion.div>
           </div>
         </motion.div>
@@ -247,7 +253,7 @@ const Index = () => {
       <CinematicDivider />
 
       {/* ═══ SCROLL STORY ═══ */}
-      <ScrollStorySection />
+      <Suspense fallback={null}><ScrollStorySection /></Suspense>
 
       <CinematicDivider />
 
@@ -267,7 +273,7 @@ const Index = () => {
 
       {/* ═══ INTERACTIVE PLAYGROUND ═══ */}
       <div data-gsap-section>
-        <InteractivePlayground />
+        <Suspense fallback={null}><InteractivePlayground /></Suspense>
       </div>
 
       <CinematicDivider />

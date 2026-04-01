@@ -59,15 +59,15 @@ function FloatingShapes() {
     <group ref={groupRef}>
       <mesh position={[-3, 0, -2]}>
         <octahedronGeometry args={[0.5]} />
-        <meshStandardMaterial color="#7C3AED" transparent opacity={0.3} wireframe />
+        <meshBasicMaterial color="#7C3AED" transparent opacity={0.3} wireframe />
       </mesh>
       <mesh position={[3, 1, -3]}>
         <icosahedronGeometry args={[0.4]} />
-        <meshStandardMaterial color="#06B6D4" transparent opacity={0.3} wireframe />
+        <meshBasicMaterial color="#06B6D4" transparent opacity={0.3} wireframe />
       </mesh>
       <mesh position={[0, -2, -1]}>
         <torusGeometry args={[0.5, 0.15, 8, 16]} />
-        <meshStandardMaterial color="#F59E0B" transparent opacity={0.2} wireframe />
+        <meshBasicMaterial color="#F59E0B" transparent opacity={0.2} wireframe />
       </mesh>
     </group>
   );
@@ -75,18 +75,21 @@ function FloatingShapes() {
 
 const ParticleField = () => {
   const isMobile = useIsMobile();
-  const particleCount = isMobile ? 150 : 350;
+  const particleCount = isMobile ? 80 : 200;
 
   return (
     <div className="absolute inset-0 z-0">
       <Canvas
         camera={{ position: [0, 0, 6], fov: 60 }}
-        dpr={[1, isMobile ? 1 : 1.25]}
-        frameloop="always"
+        dpr={[1, 1]}
+        frameloop="demand"
         gl={{ antialias: false, powerPreference: "high-performance" }}
+        onCreated={({ invalidate }) => {
+          const interval = setInterval(() => { invalidate(); }, 50);
+          return () => clearInterval(interval);
+        }}
       >
-        <ambientLight intensity={0.2} />
-        <pointLight position={[5, 5, 5]} color="#7C3AED" intensity={0.5} />
+        <ambientLight intensity={0.5} />
         <Particles count={particleCount} />
         <FloatingShapes />
       </Canvas>
