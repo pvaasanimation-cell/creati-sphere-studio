@@ -22,6 +22,7 @@ import Join from "./pages/Join";
 import Auth from "./pages/Auth";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
