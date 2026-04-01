@@ -51,7 +51,7 @@ const AnimatedRoutes = () => {
 const AppContent = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const isAuthPage = location.pathname === "/auth";
+  const isAuthPage = ["/auth", "/reset-password"].includes(location.pathname);
   const showGate = !loading && !user && !isAuthPage;
 
   return (
