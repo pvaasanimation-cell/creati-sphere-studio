@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Camera, Save, Globe, Briefcase, FileText, MapPin } from "lucide-react";
+import { Camera, Save, Globe, Briefcase, FileText, MapPin, User, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
 import { toast } from "sonner";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const transition = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
+const workTypes = ["Animator", "Designer", "Editor", "Developer", "VFX Artist", "3D Artist", "Member"];
+
 const Profile = () => {
-  const { user, memberProfile, loading: authLoading } = useAuth();
+  const { user, memberProfile, loading: authLoading, isAdmin, signOut, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +38,7 @@ const Profile = () => {
         bio: memberProfile.bio || "",
         work: memberProfile.work || "",
       });
-      setAvatarUrl((memberProfile as any).avatar_url || "");
+      setAvatarUrl(memberProfile.avatar_url || "");
     }
   }, [memberProfile]);
 
@@ -73,6 +76,7 @@ const Profile = () => {
     else {
       setAvatarUrl(newUrl);
       toast.success("Avatar updated!");
+      refreshProfile();
     }
     setUploading(false);
   };
@@ -98,79 +102,114 @@ const Profile = () => {
 
     setSaving(false);
     if (error) toast.error(error.message);
-    else toast.success("Profile updated!");
+    else {
+      toast.success("Profile updated!");
+      refreshProfile();
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
   };
 
   if (authLoading) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
-  const workTypes = ["Animator", "Designer", "Editor", "Developer", "Member"];
-
   return (
-    <div className="noise-bg pt-32 min-h-screen">
-      <div className="container mx-auto px-6 py-10 max-w-xl">
-        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="text-center mb-10">
-          <span className="text-interface text-primary mb-4 block">Profile</span>
+    <div className="noise-bg pt-28 pb-16 min-h-screen">
+      <div className="container mx-auto px-6 max-w-2xl">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={transition} className="text-center mb-8">
+          <span className="text-interface text-primary mb-3 block">Profile</span>
           <h1 className="text-display text-3xl md:text-4xl text-foreground">
             Your <span className="gradient-purple-cyan">Profile</span>
           </h1>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.15 }}>
-          <GlassCard className="p-8" hover={false}>
-            {/* Avatar */}
-            <div className="flex flex-col items-center mb-8">
+        {/* Profile Card */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ ...transition, delay: 0.1 }}>
+          <GlassCard className="p-6 md:p-8" hover={false}>
+            {/* Avatar + Quick Info */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 mb-8 pb-6 border-b border-border/50">
               <div
-                className="relative w-24 h-24 rounded-2xl overflow-hidden cursor-pointer group"
+                className="relative w-28 h-28 rounded-2xl overflow-hidden cursor-pointer group flex-shrink-0"
                 onClick={() => fileRef.current?.click()}
               >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground font-bold text-3xl">
+                  <div className="w-full h-full gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground font-bold text-4xl">
                     {form.name?.[0]?.toUpperCase() || "?"}
                   </div>
                 )}
                 <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Camera size={24} className="text-foreground" />
+                  <Camera size={28} className="text-foreground" />
                 </div>
                 {uploading && (
                   <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-              <p className="text-xs text-muted-foreground mt-2">Click to change avatar</p>
+
+              <div className="text-center sm:text-left flex-1">
+                <h2 className="text-xl font-bold text-foreground">{form.name || "Your Name"}</h2>
+                <p className="text-sm text-primary font-medium">@{form.username || "username"}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  {form.work && (
+                    <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-medium">
+                      {form.work}
+                    </span>
+                  )}
+                  {isAdmin && (
+                    <span className="px-2.5 py-1 rounded-lg bg-accent/10 text-accent text-xs font-medium flex items-center gap-1">
+                      <Shield size={10} /> Admin
+                    </span>
+                  )}
+                  {form.country && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <MapPin size={10} /> {form.country}{form.city ? `, ${form.city}` : ""}
+                    </span>
+                  )}
+                </div>
+                {form.bio && (
+                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{form.bio}</p>
+                )}
+              </div>
             </div>
 
-            {/* Form */}
+            {/* Edit Form */}
             <form onSubmit={handleSave} className="flex flex-col gap-4">
-              <div>
-                <label className="text-interface text-muted-foreground mb-1.5 block">Full Name *</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  required
-                  maxLength={100}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><User size={11} /> Full Name *</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    required
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 block text-xs">Username *</label>
+                  <input
+                    type="text"
+                    value={form.username}
+                    onChange={(e) => setForm({ ...form, username: e.target.value.replace(/\s/g, "").toLowerCase() })}
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    required
+                    maxLength={30}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-interface text-muted-foreground mb-1.5 block">Username *</label>
-                <input
-                  type="text"
-                  value={form.username}
-                  onChange={(e) => setForm({ ...form, username: e.target.value.replace(/\s/g, "").toLowerCase() })}
-                  className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  required
-                  maxLength={30}
-                />
-              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1"><Globe size={12} /> Country</label>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Globe size={11} /> Country</label>
                   <input
                     type="text"
                     value={form.country}
@@ -180,7 +219,7 @@ const Profile = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1"><MapPin size={12} /> City</label>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><MapPin size={11} /> City</label>
                   <input
                     type="text"
                     value={form.city}
@@ -190,8 +229,9 @@ const Profile = () => {
                   />
                 </div>
               </div>
+
               <div>
-                <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1"><FileText size={12} /> Bio</label>
+                <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><FileText size={11} /> Bio</label>
                 <textarea
                   value={form.bio}
                   onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -200,10 +240,12 @@ const Profile = () => {
                   maxLength={300}
                   placeholder="Tell us about yourself..."
                 />
+                <p className="text-xs text-muted-foreground mt-1 text-right">{form.bio.length}/300</p>
               </div>
+
               <div>
-                <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1"><Briefcase size={12} /> Work Type</label>
-                <div className="grid grid-cols-3 gap-2">
+                <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Briefcase size={11} /> Work Type</label>
+                <div className="flex flex-wrap gap-2">
                   {workTypes.map((w) => (
                     <button
                       key={w}
@@ -220,6 +262,7 @@ const Profile = () => {
                   ))}
                 </div>
               </div>
+
               <button
                 type="submit"
                 disabled={saving}
@@ -229,8 +272,29 @@ const Profile = () => {
                 {saving ? "Saving..." : "Save Profile"}
               </button>
             </form>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="w-full mt-4 py-3 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-destructive/50 font-medium transition-all flex items-center justify-center gap-2"
+            >
+              <LogOut size={16} />
+              Sign Out
+            </button>
           </GlassCard>
         </motion.div>
+
+        {/* Member Since */}
+        {memberProfile?.created_at && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center text-xs text-muted-foreground mt-6"
+          >
+            Member since {new Date(memberProfile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+          </motion.p>
+        )}
       </div>
     </div>
   );
