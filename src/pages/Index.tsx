@@ -224,7 +224,9 @@ const Index = () => {
             </div>
 
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ ...transition, delay: 0.5 }} className="flex-1 w-full max-w-lg">
-              <Character3D />
+              <Suspense fallback={<div className="w-full h-[320px]" />}>
+                <Character3D />
+              </Suspense>
             </motion.div>
           </div>
         </motion.div>
