@@ -149,7 +149,7 @@ const Members = () => {
                 transition={{ ...transition, delay: Math.min(i * 0.04, 0.4) }}
               >
                 <GlassCard className="p-5 cursor-pointer border-glow" hover>
-                  <button onClick={() => setSelectedMember(m)} className="w-full text-left">
+                  <button onClick={() => navigate(`/member/${m.username}`)} className="w-full text-left">
                     <div className="flex items-start gap-3">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 5 }}
