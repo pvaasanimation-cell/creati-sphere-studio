@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Search, Globe, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
-import MemberProfilePopup from "@/components/MemberProfilePopup";
 import type { MemberProfile } from "@/contexts/AuthContext";
 
 const transition = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
