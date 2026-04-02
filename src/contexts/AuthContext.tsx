@@ -28,6 +28,9 @@ export interface MemberProfile {
   online: boolean;
   created_at: string;
   avatar_url: string;
+  twitter: string;
+  instagram: string;
+  portfolio_url: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

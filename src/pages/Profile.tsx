@@ -252,6 +252,43 @@ const Profile = () => {
                 <p className="text-xs text-muted-foreground mt-1 text-right">{form.bio.length}/300</p>
               </div>
 
+              {/* Social Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Twitter size={11} /> Twitter</label>
+                  <input
+                    type="text"
+                    value={form.twitter}
+                    onChange={(e) => setForm({ ...form, twitter: e.target.value })}
+                    placeholder="@username"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Instagram size={11} /> Instagram</label>
+                  <input
+                    type="text"
+                    value={form.instagram}
+                    onChange={(e) => setForm({ ...form, instagram: e.target.value })}
+                    placeholder="@username"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Link size={11} /> Portfolio URL</label>
+                  <input
+                    type="url"
+                    value={form.portfolio_url}
+                    onChange={(e) => setForm({ ...form, portfolio_url: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={200}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Briefcase size={11} /> Work Type</label>
                 <div className="flex flex-wrap gap-2">
