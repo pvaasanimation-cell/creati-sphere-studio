@@ -20,6 +20,7 @@ const About = lazy(() => import("./pages/About"));
 const Works = lazy(() => import("./pages/Works"));
 const Community = lazy(() => import("./pages/Community"));
 const Members = lazy(() => import("./pages/Members"));
+const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const Join = lazy(() => import("./pages/Join"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
