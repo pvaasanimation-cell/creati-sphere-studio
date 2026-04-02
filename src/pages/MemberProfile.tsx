@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Globe, Users, Calendar, ArrowLeft, Star } from "lucide-react";
+import { Globe, Users, Calendar, ArrowLeft, Star, Twitter, Instagram, Link as LinkIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
 import type { MemberProfile as MemberProfileType } from "@/contexts/AuthContext";
@@ -138,6 +138,45 @@ const MemberProfile = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Social Links */}
+                {(member.twitter || member.instagram || member.portfolio_url) && (
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    {member.twitter && (
+                      <a
+                        href={member.twitter.startsWith("http") ? member.twitter : `https://twitter.com/${member.twitter.replace(/^@/, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 transition-colors text-sm text-foreground"
+                      >
+                        <Twitter size={16} className="text-muted-foreground" />
+                        {member.twitter.startsWith("http") ? "Twitter" : member.twitter}
+                      </a>
+                    )}
+                    {member.instagram && (
+                      <a
+                        href={member.instagram.startsWith("http") ? member.instagram : `https://instagram.com/${member.instagram.replace(/^@/, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 transition-colors text-sm text-foreground"
+                      >
+                        <Instagram size={16} className="text-muted-foreground" />
+                        {member.instagram.startsWith("http") ? "Instagram" : member.instagram}
+                      </a>
+                    )}
+                    {member.portfolio_url && (
+                      <a
+                        href={member.portfolio_url.startsWith("http") ? member.portfolio_url : `https://${member.portfolio_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/30 hover:bg-primary/10 transition-colors text-sm text-foreground"
+                      >
+                        <LinkIcon size={16} className="text-muted-foreground" />
+                        Portfolio
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </GlassCard>

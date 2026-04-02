@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Camera, Save, Globe, Briefcase, FileText, MapPin, User, LogOut, Shield } from "lucide-react";
+import { Camera, Save, Globe, Briefcase, FileText, MapPin, User, LogOut, Shield, Twitter, Instagram, Link } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
@@ -26,6 +26,9 @@ const Profile = () => {
     city: "",
     bio: "",
     work: "",
+    twitter: "",
+    instagram: "",
+    portfolio_url: "",
   });
 
   useEffect(() => {
@@ -37,6 +40,9 @@ const Profile = () => {
         city: memberProfile.city || "",
         bio: memberProfile.bio || "",
         work: memberProfile.work || "",
+        twitter: memberProfile.twitter || "",
+        instagram: memberProfile.instagram || "",
+        portfolio_url: memberProfile.portfolio_url || "",
       });
       setAvatarUrl(memberProfile.avatar_url || "");
     }
@@ -97,6 +103,9 @@ const Profile = () => {
         city: form.city.trim(),
         bio: form.bio.trim(),
         work: form.work.trim(),
+        twitter: form.twitter.trim(),
+        instagram: form.instagram.trim(),
+        portfolio_url: form.portfolio_url.trim(),
       })
       .eq("user_id", user.id);
 
@@ -241,6 +250,43 @@ const Profile = () => {
                   placeholder="Tell us about yourself..."
                 />
                 <p className="text-xs text-muted-foreground mt-1 text-right">{form.bio.length}/300</p>
+              </div>
+
+              {/* Social Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Twitter size={11} /> Twitter</label>
+                  <input
+                    type="text"
+                    value={form.twitter}
+                    onChange={(e) => setForm({ ...form, twitter: e.target.value })}
+                    placeholder="@username"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Instagram size={11} /> Instagram</label>
+                  <input
+                    type="text"
+                    value={form.instagram}
+                    onChange={(e) => setForm({ ...form, instagram: e.target.value })}
+                    placeholder="@username"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-interface text-muted-foreground mb-1.5 flex items-center gap-1 text-xs"><Link size={11} /> Portfolio URL</label>
+                  <input
+                    type="url"
+                    value={form.portfolio_url}
+                    onChange={(e) => setForm({ ...form, portfolio_url: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    maxLength={200}
+                  />
+                </div>
               </div>
 
               <div>
