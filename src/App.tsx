@@ -20,6 +20,7 @@ const About = lazy(() => import("./pages/About"));
 const Works = lazy(() => import("./pages/Works"));
 const Community = lazy(() => import("./pages/Community"));
 const Members = lazy(() => import("./pages/Members"));
+const MemberProfile = lazy(() => import("./pages/MemberProfile"));
 const Join = lazy(() => import("./pages/Join"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
@@ -46,6 +47,7 @@ const AnimatedRoutes = () => {
           <Route path="/works" element={<PageTransition><Works /></PageTransition>} />
           <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
           <Route path="/members" element={<PageTransition><Members /></PageTransition>} />
+          <Route path="/member/:username" element={<PageTransition><MemberProfile /></PageTransition>} />
           <Route path="/join" element={<PageTransition><Join /></PageTransition>} />
           <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
           <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
@@ -61,7 +63,7 @@ const AnimatedRoutes = () => {
 const AppContent = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const isAuthPage = ["/auth", "/reset-password"].includes(location.pathname);
+  const isAuthPage = ["/auth", "/reset-password"].includes(location.pathname) || location.pathname.startsWith("/member/");
   const showGate = !loading && !user && !isAuthPage;
 
   return (

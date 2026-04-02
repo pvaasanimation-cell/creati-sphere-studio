@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Search, Globe, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
-import MemberProfilePopup from "@/components/MemberProfilePopup";
 import type { MemberProfile } from "@/contexts/AuthContext";
 
 const transition = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
 const Members = () => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [search, setSearch] = useState("");
   const [filterWork, setFilterWork] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [selectedMember, setSelectedMember] = useState<MemberProfile | null>(null);
 
   const workTypes = ["All", "Animator", "Designer", "Editor", "Developer", "Member"];
 
@@ -77,7 +77,7 @@ const Members = () => {
                 {onlineMembers.map((m) => (
                   <button
                     key={m.id}
-                    onClick={() => setSelectedMember(m)}
+                    onClick={() => navigate(`/member/${m.username}`)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 hover:bg-primary/10 transition-colors cursor-pointer"
                   >
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -149,7 +149,7 @@ const Members = () => {
                 transition={{ ...transition, delay: Math.min(i * 0.04, 0.4) }}
               >
                 <GlassCard className="p-5 cursor-pointer border-glow" hover>
-                  <button onClick={() => setSelectedMember(m)} className="w-full text-left">
+                  <button onClick={() => navigate(`/member/${m.username}`)} className="w-full text-left">
                     <div className="flex items-start gap-3">
                       <motion.div
                         whileHover={{ scale: 1.1, rotate: 5 }}
@@ -197,9 +197,6 @@ const Members = () => {
           {members.length} members • {onlineMembers.length} online • {new Set(members.map(m => m.country).filter(Boolean)).size} countries
         </motion.div>
       </div>
-
-      {/* Member Profile Popup */}
-      <MemberProfilePopup member={selectedMember} onClose={() => setSelectedMember(null)} />
     </div>
   );
 };
