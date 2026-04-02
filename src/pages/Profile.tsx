@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Camera, Save, Globe, Briefcase, FileText, MapPin, User, LogOut, Shield } from "lucide-react";
+import { Camera, Save, Globe, Briefcase, FileText, MapPin, User, LogOut, Shield, Twitter, Instagram, Link } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
