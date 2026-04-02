@@ -197,10 +197,8 @@ const Members = () => {
           {members.length} members • {onlineMembers.length} online • {new Set(members.map(m => m.country).filter(Boolean)).size} countries
         </motion.div>
       </div>
-
-      {/* Member Profile Popup */}
-      <MemberProfilePopup member={selectedMember} onClose={() => setSelectedMember(null)} />
     </div>
+  );
   );
 };
 
