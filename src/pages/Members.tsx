@@ -77,7 +77,7 @@ const Members = () => {
                 {onlineMembers.map((m) => (
                   <button
                     key={m.id}
-                    onClick={() => setSelectedMember(m)}
+                    onClick={() => navigate(`/member/${m.username}`)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 hover:bg-primary/10 transition-colors cursor-pointer"
                   >
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
