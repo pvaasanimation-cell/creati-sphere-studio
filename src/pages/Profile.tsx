@@ -40,6 +40,9 @@ const Profile = () => {
         city: memberProfile.city || "",
         bio: memberProfile.bio || "",
         work: memberProfile.work || "",
+        twitter: memberProfile.twitter || "",
+        instagram: memberProfile.instagram || "",
+        portfolio_url: memberProfile.portfolio_url || "",
       });
       setAvatarUrl(memberProfile.avatar_url || "");
     }
