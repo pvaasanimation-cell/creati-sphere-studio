@@ -24,8 +24,11 @@ export type Database = {
           created_at: string | null
           featured: boolean | null
           id: string
+          instagram: string | null
           name: string
           online: boolean | null
+          portfolio_url: string | null
+          twitter: string | null
           user_id: string
           username: string
           work: string | null
@@ -39,8 +42,11 @@ export type Database = {
           created_at?: string | null
           featured?: boolean | null
           id?: string
+          instagram?: string | null
           name: string
           online?: boolean | null
+          portfolio_url?: string | null
+          twitter?: string | null
           user_id: string
           username: string
           work?: string | null
@@ -54,8 +60,11 @@ export type Database = {
           created_at?: string | null
           featured?: boolean | null
           id?: string
+          instagram?: string | null
           name?: string
           online?: boolean | null
+          portfolio_url?: string | null
+          twitter?: string | null
           user_id?: string
           username?: string
           work?: string | null
