@@ -26,6 +26,9 @@ const Profile = () => {
     city: "",
     bio: "",
     work: "",
+    twitter: "",
+    instagram: "",
+    portfolio_url: "",
   });
 
   useEffect(() => {
