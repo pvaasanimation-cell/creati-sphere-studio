@@ -9,11 +9,11 @@ import type { MemberProfile } from "@/contexts/AuthContext";
 const transition = { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const };
 
 const Members = () => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [search, setSearch] = useState("");
   const [filterWork, setFilterWork] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [selectedMember, setSelectedMember] = useState<MemberProfile | null>(null);
 
   const workTypes = ["All", "Animator", "Designer", "Editor", "Developer", "Member"];
 
