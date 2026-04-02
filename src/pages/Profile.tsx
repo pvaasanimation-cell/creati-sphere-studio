@@ -103,6 +103,9 @@ const Profile = () => {
         city: form.city.trim(),
         bio: form.bio.trim(),
         work: form.work.trim(),
+        twitter: form.twitter.trim(),
+        instagram: form.instagram.trim(),
+        portfolio_url: form.portfolio_url.trim(),
       })
       .eq("user_id", user.id);
 
