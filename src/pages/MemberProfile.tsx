@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Globe, Users, Calendar, ArrowLeft, Star } from "lucide-react";
+import { Globe, Users, Calendar, ArrowLeft, Star, Twitter, Instagram, Link as LinkIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import GlassCard from "@/components/GlassCard";
 import type { MemberProfile as MemberProfileType } from "@/contexts/AuthContext";
