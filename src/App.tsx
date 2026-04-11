@@ -1,6 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +12,6 @@ import ScrollProgressBar from "@/components/ScrollProgressBar";
 import PageTransition from "@/components/PageTransition";
 import CursorGlow from "@/components/CursorGlow";
 import SmoothScroll from "@/components/SmoothScroll";
-import EntryGate from "@/components/EntryGate";
 
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
@@ -36,12 +35,30 @@ const PageFallback = () => (
   </div>
 );
 
+/* Route guard for authenticated-only pages */
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <PageFallback />;
+  if (!user) return <Navigate to="/auth?mode=login" replace />;
+  return <>{children}</>;
+};
+
+/* Route guard for admin-only pages */
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, isAdmin } = useAuth();
+  if (loading) return <PageFallback />;
+  if (!user) return <Navigate to="/auth?mode=admin-login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <>{children}</>;
+};
+
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
     <AnimatePresence mode="wait">
       <Suspense fallback={<PageFallback />}>
         <Routes location={location} key={location.pathname}>
+          {/* Public routes - no auth required */}
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/works" element={<PageTransition><Works /></PageTransition>} />
@@ -50,9 +67,14 @@ const AnimatedRoutes = () => {
           <Route path="/member/:username" element={<PageTransition><MemberProfile /></PageTransition>} />
           <Route path="/join" element={<PageTransition><Join /></PageTransition>} />
           <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-          <Route path="/admin" element={<PageTransition><AdminPanel /></PageTransition>} />
-          <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
           <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+
+          {/* Protected routes - login required */}
+          <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
+
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminRoute><PageTransition><AdminPanel /></PageTransition></AdminRoute>} />
+
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </Suspense>
@@ -61,22 +83,14 @@ const AnimatedRoutes = () => {
 };
 
 const AppContent = () => {
-  const { user, loading } = useAuth();
-  const location = useLocation();
-  const isAuthPage = ["/auth", "/reset-password"].includes(location.pathname) || location.pathname.startsWith("/member/");
-  const showGate = !loading && !user && !isAuthPage;
-
   return (
-    <>
-      {showGate && <EntryGate />}
-      <SmoothScroll>
-        <CursorGlow />
-        <ScrollProgressBar />
-        <Navbar />
-        <AnimatedRoutes />
-        <Footer />
-      </SmoothScroll>
-    </>
+    <SmoothScroll>
+      <CursorGlow />
+      <ScrollProgressBar />
+      <Navbar />
+      <AnimatedRoutes />
+      <Footer />
+    </SmoothScroll>
   );
 };
 
