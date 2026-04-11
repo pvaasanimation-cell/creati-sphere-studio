@@ -10,24 +10,21 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const groupRef = useRef<THREE.Group>(null);
   const waveStrengthRef = useRef(0);
   const { scene, animations } = useGLTF("/models/character.glb");
-  const clonedScene = useMemo(() => scene.clone(true), [scene]);
-  const { actions, names, mixer } = useAnimations(animations, groupRef);
-
-  const { normalizedScale, modelOffset } = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(scene);
+  const clonedScene = useMemo(() => {
+    const c = scene.clone(true);
+    // Apply scale directly to the scene object so it actually takes effect
+    const box = new THREE.Box3().setFromObject(c);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const safeHeight = Math.max(size.y, 0.001);
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const safeMax = Math.max(maxDim, 0.001);
-    const targetHeight = 1.8;
-    return {
-      normalizedScale: targetHeight / safeMax,
-      modelOffset: [-center.x, -center.y, -center.z] as [number, number, number],
-    };
+    const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+    const s = 2.2 / maxDim;
+    c.scale.multiplyScalar(s);
+    c.position.set(-center.x * s, -box.min.y * s, -center.z * s);
+    return c;
   }, [scene]);
+  const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   // Play all embedded animations from the GLB
   useEffect(() => {
@@ -59,8 +56,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     const waveX = ws * 0.08;
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    // Position: shifted down and slightly right for hero layout
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.3 + waveBounce;
+    groupRef.current.position.y = -1.1 + Math.sin(t * 1.2) * 0.04 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
@@ -73,8 +69,8 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   });
 
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0, -0.3, 0]} rotation={[0, -0.15, 0]}>
-      <primitive object={clonedScene} position={modelOffset} />
+    <group ref={groupRef} position={[0, -1.1, 0]} rotation={[0, -0.15, 0]}>
+      <primitive object={clonedScene} />
     </group>
   );
 }
@@ -184,7 +180,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.8, 4.5], fov: 45 }}
+        camera={{ position: [0, 0.8, 4], fov: 45 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
