@@ -13,14 +13,8 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions, names, mixer } = useAnimations(animations, groupRef);
 
-  const normalizedScale = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const maxDim = Math.max(size.x, size.y, size.z, 0.001);
-    // Scale so the largest dimension becomes ~2.5 world units
-    return 2.5 / maxDim;
-  }, [scene]);
+  // For skinned meshes, Box3 is unreliable. Use a fixed small scale.
+  const normalizedScale = 0.04;
 
   // Play all embedded animations from the GLB
   useEffect(() => {
@@ -179,7 +173,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 1.2, 5.5], fov: 35 }}
+        camera={{ position: [0, 0.8, 4], fov: 45 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
