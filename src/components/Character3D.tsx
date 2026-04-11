@@ -12,36 +12,19 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const { scene, animations } = useGLTF("/models/character.glb");
   const clonedScene = useMemo(() => {
     const c = scene.clone(true);
-    // Reset any baked-in root transforms
-    c.scale.set(1, 1, 1);
-    c.position.set(0, 0, 0);
-    c.rotation.set(0, 0, 0);
-    c.traverse((child) => {
-      if (child !== c && child.type === 'Object3D') {
-        // Don't reset mesh/bone transforms, only wrapper nodes
-      }
-    });
-    return c;
-  }, [scene]);
-  const { actions, names, mixer } = useAnimations(animations, groupRef);
-
-  // Compute proper scale by measuring the actual cloned scene
-  const { fitScale, centerOffset } = useMemo(() => {
-    // Force update world matrices
-    clonedScene.updateWorldMatrix(true, true);
-    const box = new THREE.Box3().setFromObject(clonedScene);
+    // Apply scale directly to the scene object so it actually takes effect
+    const box = new THREE.Box3().setFromObject(c);
     const size = new THREE.Vector3();
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z, 0.001);
     const s = 2.2 / maxDim;
-    console.log("[Character3D] Cloned scene size:", size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2), "scale:", s.toFixed(6), "boxMin.y:", box.min.y.toFixed(2));
-    return {
-      fitScale: s,
-      centerOffset: new THREE.Vector3(-center.x, -box.min.y, -center.z),
-    };
-  }, [clonedScene]);
+    c.scale.multiplyScalar(s);
+    c.position.set(-center.x * s, -box.min.y * s, -center.z * s);
+    return c;
+  }, [scene]);
+  const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   // Play all embedded animations from the GLB
   useEffect(() => {
@@ -87,9 +70,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
 
   return (
     <group ref={groupRef} position={[0, -1.1, 0]} rotation={[0, -0.15, 0]}>
-      <group scale={fitScale} position={[centerOffset.x, centerOffset.y, centerOffset.z]}>
-        <primitive object={clonedScene} />
-      </group>
+      <primitive object={clonedScene} />
     </group>
   );
 }
