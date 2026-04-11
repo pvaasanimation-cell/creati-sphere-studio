@@ -13,20 +13,13 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions, names, mixer } = useAnimations(animations, groupRef);
 
-  const { normalizedScale, modelOffset } = useMemo(() => {
+  const normalizedScale = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
     box.getSize(size);
-    box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z, 0.001);
-    const targetSize = 2.5;
-    const s = targetSize / maxDim;
-    // Center horizontally/depth, place feet at y=0
-    return {
-      normalizedScale: s,
-      modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
-    };
+    // Scale so the largest dimension becomes ~2.5 world units
+    return 2.5 / maxDim;
   }, [scene]);
 
   // Play all embedded animations from the GLB
@@ -59,8 +52,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     const waveX = ws * 0.08;
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    // Feet at bottom of canvas, idle bob
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 1.2 + waveBounce;
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
@@ -72,9 +64,12 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     );
   });
 
+  // Use a nested group: outer for animation, inner to center the model
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0, -1.2, 0]} rotation={[0, -0.15, 0]}>
-      <primitive object={clonedScene} position={modelOffset} />
+    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, -0.15, 0]}>
+      <group scale={normalizedScale}>
+        <primitive object={clonedScene} />
+      </group>
     </group>
   );
 }
@@ -184,7 +179,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.5, 5], fov: 40 }}
+        camera={{ position: [0, 1.2, 5.5], fov: 35 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
