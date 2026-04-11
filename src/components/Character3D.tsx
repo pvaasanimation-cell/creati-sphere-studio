@@ -10,7 +10,8 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const groupRef = useRef<THREE.Group>(null);
   const waveStrengthRef = useRef(0);
   const { scene, animations } = useGLTF("/models/character.glb");
-  const { actions, names } = useAnimations(animations, groupRef);
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+  const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   const { normalizedScale, modelOffset } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene);
@@ -19,13 +20,14 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     box.getSize(size);
     box.getCenter(center);
     const safeHeight = Math.max(size.y, 0.001);
-    const targetHeight = 1.2;
+    const targetHeight = 2.2;
     return {
       normalizedScale: targetHeight / safeHeight,
       modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
   }, [scene]);
 
+  // Play all embedded animations from the GLB
   useEffect(() => {
     if (names.length > 0) {
       names.forEach((name) => {
@@ -41,37 +43,36 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     };
   }, [actions, names]);
 
+  // Update animation mixer every frame
   useFrame((state, delta) => {
     if (!groupRef.current) return;
+    mixer?.update(delta);
     const t = state.clock.elapsedTime;
 
-    // Smoothly ramp waveStrength toward 1 on hover, 0 otherwise
     const target = isHovered.current ? 1 : 0;
     waveStrengthRef.current = THREE.MathUtils.lerp(waveStrengthRef.current, target, delta * 4);
     const ws = waveStrengthRef.current;
 
-    // Wave: tilt side-to-side + bounce
     const waveZ = ws * Math.sin(t * 10) * 0.12;
     const waveX = ws * 0.08;
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    // Idle bobbing
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.5 + waveBounce;
+    // Position: shifted down and slightly right for hero layout
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 1.0 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
-    // Mouse follow (reduced during wave)
     const mouseInfluence = 1 - ws * 0.7;
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      (mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1) * mouseInfluence,
+      (mouse.current.x * 0.3 + Math.sin(t * 0.4) * 0.1) * mouseInfluence - 0.15,
       0.04
     );
   });
 
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0, -0.9, 0]}>
-      <primitive object={scene} position={modelOffset} />
+    <group ref={groupRef} scale={normalizedScale} position={[0.2, -1.0, 0]} rotation={[0, -0.15, 0]}>
+      <primitive object={clonedScene} position={modelOffset} />
     </group>
   );
 }
@@ -98,10 +99,6 @@ function FloatingAccents() {
       <mesh position={[1, -0.2, 0.3]}>
         <torusGeometry args={[0.06, 0.015, 8, 12]} />
         <meshStandardMaterial color="#F59E0B" transparent opacity={0.5} />
-      </mesh>
-      <mesh position={[1.1, 0.5, -0.4]}>
-        <boxGeometry args={[0.08, 0.08, 0.08]} />
-        <meshStandardMaterial color="#06B6D4" emissive="#06B6D4" emissiveIntensity={0.2} wireframe />
       </mesh>
     </group>
   );
@@ -138,18 +135,14 @@ function CharacterScene({ isHovered }: { isHovered: React.MutableRefObject<boole
         <meshBasicMaterial />
       </mesh>
 
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[3, 5, 2]} intensity={1} />
+      {/* Minimal lighting: one ambient + one directional */}
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[3, 5, 2]} intensity={0.8} />
 
       <Suspense fallback={<LoadingFallback />}>
         <CustomCharacter mouse={mouse} isHovered={isHovered} />
       </Suspense>
       <FloatingAccents />
-
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
-        <circleGeometry args={[1.5, 24]} />
-        <meshStandardMaterial color="#7C3AED" transparent opacity={0.06} />
-      </mesh>
     </group>
   );
 }
@@ -171,7 +164,7 @@ const Character3D = () => {
   return (
     <div
       className="relative w-full"
-      style={{ height: isMobile ? "320px" : "480px" }}
+      style={{ height: isMobile ? "350px" : "520px" }}
       onMouseEnter={() => { isHovered.current = true; }}
       onMouseLeave={() => { isHovered.current = false; }}
     >
@@ -189,20 +182,14 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.8, 4], fov: 45 }}
+        camera={{ position: [0, 0.5, 3.5], fov: 50 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
         style={{ cursor: "pointer" }}
         onCreated={({ invalidate }) => {
-          // Render at ~30fps instead of 60 to reduce GPU load
-          let raf: number;
-          const loop = () => {
-            invalidate();
-            raf = requestAnimationFrame(loop);
-          };
           const interval = setInterval(() => { invalidate(); }, 33);
-          return () => { clearInterval(interval); cancelAnimationFrame(raf); };
+          return () => { clearInterval(interval); };
         }}
       >
         <CharacterScene isHovered={isHovered} />
