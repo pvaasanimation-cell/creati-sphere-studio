@@ -14,7 +14,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   // For skinned meshes, Box3 is unreliable. Use a fixed small scale.
-  const normalizedScale = 0.04;
+  const normalizedScale = 0.008;
 
   // Play all embedded animations from the GLB
   useEffect(() => {
