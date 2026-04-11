@@ -20,10 +20,12 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     box.getSize(size);
     box.getCenter(center);
     const safeHeight = Math.max(size.y, 0.001);
-    const targetHeight = 2.2;
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const safeMax = Math.max(maxDim, 0.001);
+    const targetHeight = 1.8;
     return {
-      normalizedScale: targetHeight / safeHeight,
-      modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
+      normalizedScale: targetHeight / safeMax,
+      modelOffset: [-center.x, -center.y, -center.z] as [number, number, number],
     };
   }, [scene]);
 
@@ -58,7 +60,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
     // Position: shifted down and slightly right for hero layout
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 1.0 + waveBounce;
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 0.3 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
@@ -71,7 +73,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   });
 
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0.2, -1.0, 0]} rotation={[0, -0.15, 0]}>
+    <group ref={groupRef} scale={normalizedScale} position={[0, -0.3, 0]} rotation={[0, -0.15, 0]}>
       <primitive object={clonedScene} position={modelOffset} />
     </group>
   );
@@ -182,7 +184,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.5, 3.5], fov: 50 }}
+        camera={{ position: [0, 0.8, 4.5], fov: 45 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
