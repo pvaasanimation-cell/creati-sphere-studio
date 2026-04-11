@@ -20,13 +20,12 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     box.getSize(size);
     box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z, 0.001);
-    // Fit the character to ~2 units tall regardless of GLB size
-    const targetSize = 2;
+    const targetSize = 2.5;
     const s = targetSize / maxDim;
-    console.log("[Character3D] GLB size:", size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2), "scale:", s.toFixed(4));
+    // Center horizontally/depth, place feet at y=0
     return {
       normalizedScale: s,
-      modelOffset: [-center.x, -center.y + (size.y * 0.5 - center.y), -center.z] as [number, number, number],
+      modelOffset: [-center.x, -box.min.y, -center.z] as [number, number, number],
     };
   }, [scene]);
 
@@ -60,8 +59,8 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     const waveX = ws * 0.08;
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    // Position: shifted down and slightly right for hero layout
-    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 + waveBounce;
+    // Feet at bottom of canvas, idle bob
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 - 1.2 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
@@ -74,7 +73,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   });
 
   return (
-    <group ref={groupRef} scale={normalizedScale} position={[0, 0, 0]} rotation={[0, -0.15, 0]}>
+    <group ref={groupRef} scale={normalizedScale} position={[0, -1.2, 0]} rotation={[0, -0.15, 0]}>
       <primitive object={clonedScene} position={modelOffset} />
     </group>
   );
@@ -185,7 +184,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 1, 6], fov: 40 }}
+        camera={{ position: [0, 0.5, 5], fov: 40 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
