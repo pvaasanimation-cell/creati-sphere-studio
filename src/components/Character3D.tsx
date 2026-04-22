@@ -12,18 +12,10 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   const { scene, animations } = useGLTF("/models/character.glb");
   const clonedScene = useMemo(() => {
     const c = scene.clone(true);
-    // Apply scale directly to the scene object so it actually takes effect
-    const box = new THREE.Box3().setFromObject(c);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-    const maxDim = Math.max(size.x, size.y, size.z, 0.001);
-    const s = 2.2 / maxDim;
-    c.scale.multiplyScalar(s);
-    c.position.set(-center.x * s, -box.min.y * s, -center.z * s);
     return c;
   }, [scene]);
+  const fitScale = useRef(1);
+  const fitOffset = useRef(new THREE.Vector3());
   const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   // Play all embedded animations from the GLB
