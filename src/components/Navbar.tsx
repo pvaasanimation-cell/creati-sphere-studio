@@ -135,7 +135,80 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2" ref={searchRef}>
+          {/* Member Search */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setSearchOpen((v) => !v);
+                setTimeout(() => inputRef.current?.focus(), 50);
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg glass text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Search members"
+            >
+              <Search size={14} />
+              <span className="hidden lg:inline">Search members</span>
+              <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground font-mono">⌘K</kbd>
+            </button>
+
+            <AnimatePresence>
+              {searchOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-80 glass rounded-xl overflow-hidden shadow-2xl border border-border/50 z-50"
+                >
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/50">
+                    <Search size={14} className="text-muted-foreground shrink-0" />
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by name or username…"
+                      className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {searchLoading && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">Searching…</div>
+                    )}
+                    {!searchLoading && searchQuery && results.length === 0 && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">No members found</div>
+                    )}
+                    {!searchLoading && !searchQuery && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">Type to search members</div>
+                    )}
+                    {results.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => openMemberProfile(m.username)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                      >
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt={m.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-lg gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                            {m.name?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm text-foreground truncate">{m.name}</p>
+                            {m.online && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">@{m.username} · {m.work || "Member"}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {isAdmin && (
             <Link
               to="/admin"
