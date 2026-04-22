@@ -267,6 +267,46 @@ const Navbar = () => {
             className="md:hidden glass mt-2 mx-4 rounded-xl overflow-hidden"
           >
             <div className="p-4 flex flex-col gap-1">
+              {/* Mobile member search */}
+              <div className="mb-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/40">
+                  <Search size={14} className="text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search members…"
+                    className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                {searchQuery && (
+                  <div className="mt-1 max-h-60 overflow-y-auto rounded-lg">
+                    {searchLoading && <div className="px-3 py-2 text-xs text-muted-foreground">Searching…</div>}
+                    {!searchLoading && results.length === 0 && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">No members found</div>
+                    )}
+                    {results.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => openMemberProfile(m.username)}
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted/50 rounded-lg text-left"
+                      >
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-lg gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground text-xs font-bold">
+                            {m.name?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground truncate">{m.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">@{m.username}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.path}
