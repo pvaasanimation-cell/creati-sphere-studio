@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, Shield, User } from "lucide-react";
+import { Menu, X, LogOut, Shield, User, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -12,10 +13,26 @@ const navItems = [
   { label: "Community", path: "/community" },
 ];
 
+interface MemberResult {
+  id: string;
+  name: string;
+  username: string;
+  avatar_url: string | null;
+  work: string | null;
+  online: boolean | null;
+}
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState<MemberResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, isAdmin, signOut, memberProfile } = useAuth();
 
   useEffect(() => {
@@ -24,7 +41,63 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  useEffect(() => setMobileOpen(false), [location]);
+  useEffect(() => {
+    setMobileOpen(false);
+    setSearchOpen(false);
+    setSearchQuery("");
+  }, [location]);
+
+  // Debounced member search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      const q = searchQuery.trim();
+      const { data } = await supabase
+        .from("members")
+        .select("id, name, username, avatar_url, work, online")
+        .or(`name.ilike.%${q}%,username.ilike.%${q}%`)
+        .limit(8);
+      setResults((data as MemberResult[]) || []);
+      setSearchLoading(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Close search on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Cmd/Ctrl+K to open search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  const openMemberProfile = (username: string) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    navigate(`/member/${username}`);
+  };
+
 
   return (
     <motion.nav
