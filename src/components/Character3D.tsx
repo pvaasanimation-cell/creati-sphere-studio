@@ -191,7 +191,7 @@ const Character3D = () => {
       )}
 
       <Canvas
-        camera={{ position: [0, 0.8, 4], fov: 45 }}
+        camera={{ position: [0, 0.5, 8], fov: 35, near: 0.1, far: 100 }}
         dpr={isMobile ? [1, 1] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         frameloop="demand"
