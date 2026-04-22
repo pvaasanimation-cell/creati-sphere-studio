@@ -197,7 +197,7 @@ const Navbar = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p className="text-sm text-foreground truncate">{m.name}</p>
-                            {m.online && <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />}
+                            {m.online && <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">@{m.username} · {m.work || "Member"}</p>
                         </div>
