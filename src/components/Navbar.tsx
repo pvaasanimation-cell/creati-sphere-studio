@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, Shield, User } from "lucide-react";
+import { Menu, X, LogOut, Shield, User, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Home", path: "/" },
@@ -12,10 +13,26 @@ const navItems = [
   { label: "Community", path: "/community" },
 ];
 
+interface MemberResult {
+  id: string;
+  name: string;
+  username: string;
+  avatar_url: string | null;
+  work: string | null;
+  online: boolean | null;
+}
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState<MemberResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, isAdmin, signOut, memberProfile } = useAuth();
 
   useEffect(() => {
@@ -24,7 +41,63 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  useEffect(() => setMobileOpen(false), [location]);
+  useEffect(() => {
+    setMobileOpen(false);
+    setSearchOpen(false);
+    setSearchQuery("");
+  }, [location]);
+
+  // Debounced member search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      const q = searchQuery.trim();
+      const { data } = await supabase
+        .from("members")
+        .select("id, name, username, avatar_url, work, online")
+        .or(`name.ilike.%${q}%,username.ilike.%${q}%`)
+        .limit(8);
+      setResults((data as MemberResult[]) || []);
+      setSearchLoading(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Close search on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Cmd/Ctrl+K to open search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => inputRef.current?.focus(), 50);
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  const openMemberProfile = (username: string) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    navigate(`/member/${username}`);
+  };
+
 
   return (
     <motion.nav
@@ -62,7 +135,80 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2" ref={searchRef}>
+          {/* Member Search */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setSearchOpen((v) => !v);
+                setTimeout(() => inputRef.current?.focus(), 50);
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg glass text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Search members"
+            >
+              <Search size={14} />
+              <span className="hidden lg:inline">Search members</span>
+              <kbd className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded bg-muted/50 text-muted-foreground font-mono">⌘K</kbd>
+            </button>
+
+            <AnimatePresence>
+              {searchOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-80 glass rounded-xl overflow-hidden shadow-2xl border border-border/50 z-50"
+                >
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/50">
+                    <Search size={14} className="text-muted-foreground shrink-0" />
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by name or username…"
+                      className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {searchLoading && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">Searching…</div>
+                    )}
+                    {!searchLoading && searchQuery && results.length === 0 && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">No members found</div>
+                    )}
+                    {!searchLoading && !searchQuery && (
+                      <div className="px-4 py-6 text-center text-xs text-muted-foreground">Type to search members</div>
+                    )}
+                    {results.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => openMemberProfile(m.username)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-left"
+                      >
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt={m.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-lg gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                            {m.name?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm text-foreground truncate">{m.name}</p>
+                            {m.online && <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">@{m.username} · {m.work || "Member"}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {isAdmin && (
             <Link
               to="/admin"
@@ -121,6 +267,46 @@ const Navbar = () => {
             className="md:hidden glass mt-2 mx-4 rounded-xl overflow-hidden"
           >
             <div className="p-4 flex flex-col gap-1">
+              {/* Mobile member search */}
+              <div className="mb-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/40">
+                  <Search size={14} className="text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search members…"
+                    className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                {searchQuery && (
+                  <div className="mt-1 max-h-60 overflow-y-auto rounded-lg">
+                    {searchLoading && <div className="px-3 py-2 text-xs text-muted-foreground">Searching…</div>}
+                    {!searchLoading && results.length === 0 && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">No members found</div>
+                    )}
+                    {results.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => openMemberProfile(m.username)}
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-muted/50 rounded-lg text-left"
+                      >
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-lg gradient-bg-purple-cyan flex items-center justify-center text-primary-foreground text-xs font-bold">
+                            {m.name?.[0]?.toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground truncate">{m.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">@{m.username}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               {navItems.map((item) => (
                 <Link
                   key={item.path}
