@@ -67,6 +67,28 @@ const Navbar = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Realtime: keep online status fresh for whoever is in the current results
+  useEffect(() => {
+    if (results.length === 0) return;
+    const channel = supabase
+      .channel("navbar-search-online")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "members" },
+        (payload) => {
+          const updated = payload.new as { id: string; online?: boolean | null };
+          setResults((prev) =>
+            prev.map((m) => (m.id === updated.id ? { ...m, online: updated.online ?? m.online } : m)),
+          );
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [results.length]);
+
+
   // Close search on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
