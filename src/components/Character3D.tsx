@@ -8,14 +8,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 /* ─── Custom GLB Character ─── */
 function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{ x: number; y: number }>; isHovered: React.MutableRefObject<boolean> }) {
   const groupRef = useRef<THREE.Group>(null);
+  const innerRef = useRef<THREE.Group>(null);
   const waveStrengthRef = useRef(0);
+  const fittedRef = useRef(false);
   const { scene, animations } = useGLTF("/models/character.glb");
-  const clonedScene = useMemo(() => {
-    const c = scene.clone(true);
-    return c;
-  }, [scene]);
-  const fitScale = useRef(1);
-  const fitOffset = useRef(new THREE.Vector3());
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
   const { actions, names, mixer } = useAnimations(animations, groupRef);
 
   // Play all embedded animations from the GLB
@@ -34,12 +31,32 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     };
   }, [actions, names]);
 
-  // Update animation mixer every frame
+  // Update animation mixer every frame + auto-fit on first frames
   useFrame((state, delta) => {
-    if (!groupRef.current) return;
+    if (!groupRef.current || !innerRef.current) return;
     mixer?.update(delta);
-    const t = state.clock.elapsedTime;
 
+    // Auto-fit AFTER skeleton has posed: measure rendered bbox, then scale + center
+    // so the full character fits regardless of internal GLB transforms.
+    if (!fittedRef.current && state.clock.elapsedTime > 0.15) {
+      innerRef.current.scale.set(1, 1, 1);
+      innerRef.current.position.set(0, 0, 0);
+      innerRef.current.updateMatrixWorld(true);
+
+      const box = new THREE.Box3().setFromObject(clonedScene);
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+      const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+      const targetSize = 3.2; // fits camera at z=8, fov=35
+      const s = targetSize / maxDim;
+      innerRef.current.scale.setScalar(s);
+      innerRef.current.position.set(-center.x * s, -box.min.y * s - 1.6, -center.z * s);
+      fittedRef.current = true;
+    }
+
+    const t = state.clock.elapsedTime;
     const target = isHovered.current ? 1 : 0;
     waveStrengthRef.current = THREE.MathUtils.lerp(waveStrengthRef.current, target, delta * 4);
     const ws = waveStrengthRef.current;
@@ -48,7 +65,7 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
     const waveX = ws * 0.08;
     const waveBounce = ws * Math.abs(Math.sin(t * 8)) * 0.06;
 
-    groupRef.current.position.y = -1.1 + Math.sin(t * 1.2) * 0.04 + waveBounce;
+    groupRef.current.position.y = Math.sin(t * 1.2) * 0.04 + waveBounce;
     groupRef.current.rotation.z = Math.sin(t * 0.8) * 0.03 + waveZ;
     groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02 + waveX;
 
@@ -61,8 +78,10 @@ function CustomCharacter({ mouse, isHovered }: { mouse: React.MutableRefObject<{
   });
 
   return (
-    <group ref={groupRef} position={[0, -1.1, 0]} rotation={[0, -0.15, 0]}>
-      <primitive object={clonedScene} />
+    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, -0.15, 0]}>
+      <group ref={innerRef}>
+        <primitive object={clonedScene} />
+      </group>
     </group>
   );
 }
